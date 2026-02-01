@@ -1,0 +1,100 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+PokéJournal is a native macOS app that visualizes and analyzes Pokémon gaming sessions by reading from a local Obsidian Vault. It tracks game progress, team composition, and session history.
+
+**Tech Stack:** macOS 26+, Swift 6.2+, SwiftUI, SwiftData, MVVM architecture, Liquid Glass Design Language
+
+## Setup After Clone
+
+**Required:** Download Pokémon data and sprites before building:
+
+```bash
+python3 scripts/fetch_pokemon_data.py
+```
+
+This fetches ~1000 Pokémon from PokéAPI CSV dumps, generates `pokemon.json`, and downloads sprites into the Asset Catalog. Takes a few minutes. Both `pokemon.json` and sprites are in `.gitignore` - re-run the script to update when new Pokémon are released.
+
+Options:
+- `--limit N` - Only fetch first N Pokémon (for testing)
+- `--workers N` - Parallel downloads (default: 5)
+
+## Build Commands
+
+```bash
+# Build the project
+xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" build
+
+# Run tests
+xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" test
+
+# Build and run (typically done via Xcode ⌘R)
+open "PokéJournal/PokéJournal.xcodeproj"
+```
+
+## Architecture
+
+### Data Flow
+1. **VaultManager** handles Obsidian vault folder selection using security-scoped bookmarks (sandboxing)
+2. **DataLoader** orchestrates scanning and loading markdown files
+3. **MarkdownParser** extracts YAML frontmatter and session content
+4. **SwiftData** persists entities (Game, Session, OldSession, TeamMember)
+5. Views use `@Query` for automatic data fetching
+
+### Key Services (`Services/`)
+- **VaultManager.swift** - Vault access with NSOpenPanel and security-scoped bookmarks
+- **DataLoader.swift** - Async data pipeline, scans configured Pokemon folder in vault
+- **MarkdownParser.swift** - YAML and markdown parsing, bilingual (German/English)
+- **FileWatcher.swift** - GCD-based file system monitoring for auto-reload
+
+### Data Models (`Models/`)
+- **Game** → Sessions (1:n) + OldSessions (1:n), with cascade delete
+- **Session/OldSession** → TeamMembers (1:n)
+- **Pokemon** - Struct (not persisted), loaded from `pokemon.json`, includes fuzzy name matching
+
+### Views (`Views/`)
+- **ContentView** - NavigationSplitView root with sidebar/detail
+- **GameDetailView** - Tabbed interface (Sessions, Timeline, Team Analysis)
+- **TimelineView** - Horizontal timeline with gap detection (color-coded)
+- **TeamAnalysisView** - Usage stats and Hall of Fame
+
+## Markdown File Formats
+
+**Game file (`[gamename].md`):**
+```yaml
+---
+aliases: [Pokémon Purpur]
+release: 2022-11-18
+platforms: [Nintendo Switch]
+genre: RPG
+developer: Game Freak
+metacritic: 72
+---
+```
+
+**Session file (`[gamename]/sessions/YYYY-MM-DD_gamename.md`):**
+```markdown
+## Aktivitäten
+[activities]
+
+## Team
+- Glurak lvl 65
+- Aloha Raichu lvl 60
+```
+
+**Legacy format (`old_[gamename].md`):** Sessions split by `## YYYY-MM-DD` headers
+
+## Key Implementation Notes
+
+- Pokémon name matching uses Levenshtein distance (0.8 threshold) for German/English/variant support
+- Pokémon sprites are bundled in Asset Catalog (no network required at runtime)
+- Obsidian integration uses URL scheme: `obsidian://open?vault=[vaultName]&file=[path]`
+- App uses `@Observable` for services, `@Query` for SwiftData, `@AppStorage` for preferences
+- No external dependencies - pure Apple frameworks, sandboxed
+
+## Git Conventions
+
+- Keep commit messages short and concise (single line preferred)
