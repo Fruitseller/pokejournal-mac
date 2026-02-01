@@ -6,7 +6,6 @@ Geplante Features für zukünftige Versionen.
 
 - **Level-Progression Graph** - Visualisierung der Level-Entwicklung pro Pokémon über alle Sessions
 - **Team-Entwicklung Timeline** - Wie hat sich das Team über die Zeit verändert?
-- **Spielzeit-Schätzung** - Geschätzte Spielzeit basierend auf Session-Anzahl
 
 ## v1.2 - Filter & Suche
 
@@ -17,8 +16,10 @@ Geplante Features für zukünftige Versionen.
 ## v2.0 - Erweiterungen
 
 - **Schreibzugriff** - Sessions direkt in der App bearbeiten/erstellen
+
+## Vielleicht irgendwann
+
 - **Andere Spiele** - Nicht nur Pokémon, sondern beliebige Gaming-Journals
-- **iCloud Sync** - App-Einstellungen über Geräte synchronisieren
 
 ## Nicht geplant
 
