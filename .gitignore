@@ -67,6 +67,9 @@ fastlane/test_output
 *.gcda
 *.gcov
 
+# Claude Code (local settings are user-specific)
+.claude/settings.local.json
+
 # Pokemon data and sprites (generated via scripts/fetch_pokemon_data.py)
 PokéJournal/PokéJournal/Assets.xcassets/Sprites/
 PokéJournal/PokéJournal/Resources/pokemon.json
