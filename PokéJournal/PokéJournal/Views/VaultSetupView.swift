@@ -17,6 +17,7 @@ struct VaultSetupView: View {
             Text("Willkommen bei PokéJournal")
                 .font(.largeTitle)
                 .fontWeight(.bold)
+                .accessibilityIdentifier("welcomeTitle")
 
             Text("Um deine Pokémon-Sessions anzuzeigen, wähle bitte deinen Obsidian Vault aus.")
                 .font(.body)
@@ -32,6 +33,7 @@ struct VaultSetupView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .accessibilityIdentifier("selectVaultButton")
 
             Text("Der Pfad zum Pokémon-Ordner sollte sein:\n[Vault]/hobbies/videospiele/pokemon/")
                 .font(.caption)

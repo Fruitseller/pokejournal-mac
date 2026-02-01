@@ -15,10 +15,12 @@ struct GameListView: View {
             ForEach(games) { game in
                 GameRowView(game: game)
                     .tag(game)
+                    .accessibilityIdentifier("gameRow_\(game.name)")
             }
         }
         .listStyle(.sidebar)
         .navigationTitle("Spiele")
+        .accessibilityIdentifier("gameList")
     }
 }
 

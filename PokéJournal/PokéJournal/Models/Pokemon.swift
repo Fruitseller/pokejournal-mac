@@ -62,7 +62,7 @@ class PokemonDatabase {
         return fuzzyMatch(name: normalizedName)
     }
 
-    private func fuzzyMatch(name: String) -> Pokemon? {
+    func fuzzyMatch(name: String) -> Pokemon? {
         let threshold = 0.8
 
         for (key, poke) in nameLookup {
@@ -74,7 +74,7 @@ class PokemonDatabase {
         return nil
     }
 
-    private func similarity(_ s1: String, _ s2: String) -> Double {
+    func similarity(_ s1: String, _ s2: String) -> Double {
         let longer = s1.count > s2.count ? s1 : s2
         let shorter = s1.count > s2.count ? s2 : s1
 
@@ -86,7 +86,7 @@ class PokemonDatabase {
         return (Double(longer.count) - Double(distance)) / Double(longer.count)
     }
 
-    private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
+    func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
         let s1Array = Array(s1)
         let s2Array = Array(s2)
         let m = s1Array.count

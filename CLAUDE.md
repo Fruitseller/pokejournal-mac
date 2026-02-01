@@ -25,15 +25,49 @@ Options:
 ## Build Commands
 
 ```bash
-# Build the project
-xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" build
+# Using the test script (recommended)
+./scripts/test.sh build  # Build only
+./scripts/test.sh unit   # Run unit tests only (fast, no UI)
+./scripts/test.sh test   # Run all tests (including UI tests)
 
-# Run tests
+# Or using xcodebuild directly
+xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" build
 xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" test
 
 # Build and run (typically done via Xcode ⌘R)
 open "PokéJournal/PokéJournal.xcodeproj"
 ```
+
+## Build & Test Loops
+
+**Critical:** After EVERY code change, complete these loops autonomously BEFORE moving to the next task.
+
+### 1. Build Loop
+```bash
+./scripts/test.sh build
+```
+On errors: Read logs → fix code → rebuild. Iterate until clean build.
+
+### 2. Test Loop
+```bash
+./scripts/test.sh unit   # Fast unit tests only
+./scripts/test.sh test   # All tests including UI (slower)
+```
+On failures: Analyze output → fix tests/code → re-run.
+
+### 3. Runtime Verification
+- Launch app via Xcode (`⌘R`)
+- Check Console for SwiftUI/SwiftData warnings
+- Manually verify affected UI flows
+
+### Success Criteria for "Done"
+- ✅ Clean build (0 errors, 0 warnings)
+- ✅ All tests passing
+- ✅ App launches without crashes
+- ✅ Affected features functionally tested
+
+**Anti-Pattern:** Write code → "should work" → move to next task
+**Correct:** Code → Build → Test → Fix → Verify → Then continue
 
 ## Architecture
 

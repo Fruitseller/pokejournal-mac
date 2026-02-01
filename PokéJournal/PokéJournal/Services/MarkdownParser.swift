@@ -159,19 +159,40 @@ final class MarkdownParser {
         return (activities, plans, thoughts, team)
     }
 
-    // Parse team from "Team:" format without ## heading
+    // Parse team from various inline formats without ## heading
     private func parseTeamFromInlineFormat(_ content: String) -> [ParsedTeamMember] {
-        // Look for "Team:" followed by team member lines
-        let pattern = #"Team:\s*\n((?:- .+\n?)+)"#
-        let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+        // Try multiple patterns for team headers:
+        // 1. "Team:" or "Mein Team:" or "Mein derzeitiges Team:" etc.
+        // 2. Any line ending with "Team:" followed by bullet list
+        let teamHeaderPatterns = [
+            #"(?:Mein\s+)?(?:derzeitiges\s+)?Team[:\s]*\n((?:- .+\n?)+)"#,
+            #"Team sieht folgender Maßen aus:\s*\n+((?:- .+\n?)+)"#,
+        ]
 
-        guard let match = regex?.firstMatch(in: content, options: [], range: NSRange(content.startIndex..., in: content)),
-              let teamRange = Range(match.range(at: 1), in: content) else {
-            return []
+        for pattern in teamHeaderPatterns {
+            let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+            if let match = regex?.firstMatch(in: content, options: [], range: NSRange(content.startIndex..., in: content)),
+               let teamRange = Range(match.range(at: 1), in: content) {
+                let teamContent = String(content[teamRange])
+                let team = parseTeam(from: teamContent)
+                if !team.isEmpty {
+                    return team
+                }
+            }
         }
 
-        let teamContent = String(content[teamRange])
-        return parseTeam(from: teamContent)
+        // Fallback: Find any bullet list that looks like Pokemon team entries
+        // (lines starting with "- " followed by name and "lvl")
+        let fallbackPattern = #"((?:^- \w+.*lvl.*$\n?)+)"#
+        let fallbackRegex = try? NSRegularExpression(pattern: fallbackPattern, options: [.caseInsensitive, .anchorsMatchLines])
+
+        if let match = fallbackRegex?.firstMatch(in: content, options: [], range: NSRange(content.startIndex..., in: content)),
+           let teamRange = Range(match.range(at: 1), in: content) {
+            let teamContent = String(content[teamRange])
+            return parseTeam(from: teamContent)
+        }
+
+        return []
     }
 
     private func extractSections(from content: String) -> [String: String] {
