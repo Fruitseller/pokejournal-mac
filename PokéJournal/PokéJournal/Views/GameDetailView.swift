@@ -24,7 +24,8 @@ struct GameDetailView: View {
                 Picker("Ansicht", selection: $selectedTab) {
                     Text("Sessions").tag(0)
                     Text("Timeline").tag(1)
-                    Text("Team-Analyse").tag(2)
+                    Text("Heatmap").tag(2)
+                    Text("Team-Analyse").tag(3)
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
@@ -35,6 +36,8 @@ struct GameDetailView: View {
                 case 1:
                     TimelineView(game: game)
                 case 2:
+                    HeatmapView(game: game)
+                case 3:
                     TeamAnalysisView(game: game)
                 default:
                     EmptyView()

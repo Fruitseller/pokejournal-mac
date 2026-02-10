@@ -281,7 +281,13 @@ final class MarkdownParser {
 
                 if let prevDate = currentDate {
                     let sessionContent = currentContent.joined(separator: "\n")
-                    let (activities, plans, thoughts, team) = parseSessionSections(from: sessionContent)
+                    var (activities, plans, thoughts, team) = parseSessionSections(from: sessionContent)
+
+                    // Old format has no section headers → use raw content as activities
+                    if activities.isEmpty && plans.isEmpty && thoughts.isEmpty {
+                        activities = sessionContent.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+
                     sessions.append(ParsedSession(
                         date: prevDate,
                         activities: activities,
@@ -300,7 +306,12 @@ final class MarkdownParser {
 
         if let lastDate = currentDate {
             let sessionContent = currentContent.joined(separator: "\n")
-            let (activities, plans, thoughts, team) = parseSessionSections(from: sessionContent)
+            var (activities, plans, thoughts, team) = parseSessionSections(from: sessionContent)
+
+            if activities.isEmpty && plans.isEmpty && thoughts.isEmpty {
+                activities = sessionContent.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+
             sessions.append(ParsedSession(
                 date: lastDate,
                 activities: activities,
