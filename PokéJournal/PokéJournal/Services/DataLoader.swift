@@ -214,11 +214,10 @@ final class DataLoader {
 
     func clearAllData(context: ModelContext) {
         do {
-            try context.delete(model: TeamMember.self)
-            try context.delete(model: Session.self)
-            try context.delete(model: OldSession.self)
-            try context.delete(model: Game.self)
-            try context.save()
+            let games = try context.fetch(FetchDescriptor<Game>())
+            for game in games {
+                context.delete(game)
+            }
         } catch {
             self.error = "Fehler beim Löschen: \(error.localizedDescription)"
         }

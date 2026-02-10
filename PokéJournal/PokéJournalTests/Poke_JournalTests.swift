@@ -404,7 +404,7 @@ struct MarkdownParserTests {
         - Libelldra lvl 97
         """
 
-        let (activities, plans, thoughts, team) = parser.parseSessionSections(from: content)
+        let (activities, plans, _, team) = parser.parseSessionSections(from: content)
         #expect(activities.contains("Pokemon gefangen"))
         #expect(plans.contains("lvl 100"))
         #expect(team.count == 2)
@@ -949,4 +949,67 @@ struct TimelineDataTests {
         #expect(sessions[0].filePath == nil)
         #expect(sessions[1].filePath == "games/purpur/sessions/2025-01-05.md")
     }
+}
+
+// MARK: - DataLoader Clear & Reload Tests
+
+@Suite(.serialized)
+@MainActor
+struct DataLoaderClearTests {
+
+    private func makeContainer() throws -> ModelContainer {
+        try ModelContainer(
+            for: Game.self, Session.self, OldSession.self, TeamMember.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    }
+
+    @Test func clearAllData_thenInsert_noDuplicates() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let loader = DataLoader()
+
+        // Insert initial data
+        let game = Game(name: "purpur", filePath: "/pokemon/purpur/purpur.md")
+        context.insert(game)
+
+        let session = Session(date: Date(), activities: "Caught Pokemon")
+        session.game = game
+        context.insert(session)
+
+        let member = TeamMember(pokemonName: "Pikachu", level: 50)
+        member.session = session
+        session.team.append(member)
+        context.insert(member)
+
+        try context.save()
+
+        // Clear all data (simulates reload button press)
+        loader.clearAllData(context: context)
+
+        // Insert the same game again (simulates loadGames after clear)
+        let game2 = Game(name: "purpur", filePath: "/pokemon/purpur/purpur.md")
+        context.insert(game2)
+
+        let session2 = Session(date: Date(), activities: "Caught Pokemon")
+        session2.game = game2
+        context.insert(session2)
+
+        let member2 = TeamMember(pokemonName: "Pikachu", level: 50)
+        member2.session = session2
+        session2.team.append(member2)
+        context.insert(member2)
+
+        try context.save()
+
+        // Verify: exactly 1 game, 1 session, 1 team member — no duplicates
+        let games = try context.fetch(FetchDescriptor<Game>())
+        let sessions = try context.fetch(FetchDescriptor<Session>())
+        let members = try context.fetch(FetchDescriptor<TeamMember>())
+
+        #expect(games.count == 1, "Expected 1 game but found \(games.count) — data was duplicated on reload")
+        #expect(sessions.count == 1, "Expected 1 session but found \(sessions.count)")
+        #expect(members.count == 1, "Expected 1 team member but found \(members.count)")
+    }
+
 }

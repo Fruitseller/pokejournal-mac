@@ -31,6 +31,7 @@ struct ContentView: View {
         }
         .onChange(of: vaultManager.vaultURL) { _, newValue in
             if newValue != nil {
+                selectedGame = nil
                 Task {
                     await dataLoader.reloadData(context: modelContext)
                 }
@@ -51,6 +52,7 @@ struct ContentView: View {
 
                     ToolbarItem(placement: .automatic) {
                         Button(action: {
+                            selectedGame = nil
                             Task {
                                 await dataLoader.reloadData(context: modelContext)
                             }

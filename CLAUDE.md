@@ -123,6 +123,7 @@ metacritic: 72
 
 ## Key Implementation Notes
 
+- **Test focus:** Don't test framework behavior (e.g. SwiftData cascade deletes) — focus tests on our own logic.
 - Pokémon name matching uses Levenshtein distance (0.8 threshold) for German/English/variant support
 - Pokémon sprites are bundled in Asset Catalog (no network required at runtime)
 - Obsidian integration uses URL scheme: `obsidian://open?vault=[vaultName]&file=[path]`
