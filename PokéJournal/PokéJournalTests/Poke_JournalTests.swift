@@ -676,3 +676,277 @@ struct MarkdownParserTests {
         #expect(team.isEmpty)
     }
 }
+
+// MARK: - Timeline Data Tests
+
+@Suite(.serialized)
+@MainActor
+struct TimelineDataTests {
+
+    private func makeGame(
+        sessionDates: [Date] = [],
+        oldSessionDates: [Date] = [],
+        container: ModelContainer
+    ) -> Game {
+        let context = container.mainContext
+        let game = Game(name: "TestGame", filePath: "/test.md")
+        context.insert(game)
+
+        for date in sessionDates {
+            let session = Session(date: date)
+            session.game = game
+            context.insert(session)
+        }
+
+        for date in oldSessionDates {
+            let oldSession = OldSession(date: date)
+            oldSession.game = game
+            context.insert(oldSession)
+        }
+
+        try! context.save()
+        return game
+    }
+
+    private func makeContainer() throws -> ModelContainer {
+        try ModelContainer(
+            for: Game.self, Session.self, OldSession.self, TeamMember.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    }
+
+    private func date(_ str: String) -> Date {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.timeZone = TimeZone(identifier: "UTC")
+        return f.date(from: str)!
+    }
+
+    // MARK: - Segment Building
+
+    @Test func buildSegments_emptyGame() throws {
+        let container = try makeContainer()
+        let game = makeGame(container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.isEmpty)
+    }
+
+    @Test func buildSegments_singleSession() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [date("2025-01-15")], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        #expect(segments[0].sessions.count == 1)
+        #expect(segments[0].gapDaysAfter == nil)
+    }
+
+    @Test func buildSegments_noGaps() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [
+            date("2025-01-01"),
+            date("2025-01-03"),
+            date("2025-01-10"),
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        #expect(segments[0].sessions.count == 3)
+        #expect(segments[0].gapDaysAfter == nil)
+    }
+
+    @Test func buildSegments_oneGap() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [
+            date("2025-01-01"),
+            date("2025-01-05"),
+            date("2025-02-01"),  // 27 days gap -> exceeds 14 day threshold
+            date("2025-02-03"),
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 2)
+        #expect(segments[0].sessions.count == 2)
+        #expect(segments[0].gapDaysAfter == 27)
+        #expect(segments[1].sessions.count == 2)
+        #expect(segments[1].gapDaysAfter == nil)
+    }
+
+    @Test func buildSegments_multipleGaps() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [
+            date("2025-01-01"),
+            date("2025-03-01"),  // 59 days gap
+            date("2025-06-01"),  // 92 days gap
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 3)
+        #expect(segments[0].sessions.count == 1)
+        #expect(segments[0].gapDaysAfter == 59)
+        #expect(segments[1].sessions.count == 1)
+        #expect(segments[1].gapDaysAfter == 92)
+        #expect(segments[2].sessions.count == 1)
+        #expect(segments[2].gapDaysAfter == nil)
+    }
+
+    @Test func buildSegments_exactlyAtThreshold() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [
+            date("2025-01-01"),
+            date("2025-01-15"),  // exactly 14 days -> should trigger gap
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 2)
+        #expect(segments[0].gapDaysAfter == 14)
+    }
+
+    @Test func buildSegments_justBelowThreshold() throws {
+        let container = try makeContainer()
+        let game = makeGame(sessionDates: [
+            date("2025-01-01"),
+            date("2025-01-14"),  // 13 days -> no gap
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        #expect(segments[0].sessions.count == 2)
+    }
+
+    @Test func buildSegments_combinesSessionTypes() throws {
+        let container = try makeContainer()
+        let game = makeGame(
+            sessionDates: [date("2025-01-10")],
+            oldSessionDates: [date("2025-01-01"), date("2025-01-05")],
+            container: container
+        )
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        #expect(segments[0].sessions.count == 3)
+    }
+
+    @Test func buildSegments_sortsDates() throws {
+        let container = try makeContainer()
+        // Insert in reverse order — should still be sorted
+        let game = makeGame(sessionDates: [
+            date("2025-01-10"),
+            date("2025-01-01"),
+            date("2025-01-05"),
+        ], container: container)
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        let dates = segments[0].sessions.map(\.date)
+        #expect(dates == dates.sorted())
+    }
+
+    // MARK: - Pixels Per Day
+
+    private func session(_ dateStr: String) -> TimelineSession {
+        TimelineSession(
+            date: date(dateStr),
+            teamMembers: [],
+            activities: "",
+            filePath: nil
+        )
+    }
+
+    @Test func pixelsPerDay_singleSession() {
+        let segment = TimelineSegment(
+            sessions: [session("2025-01-01")],
+            gapDaysAfter: nil
+        )
+        let ppd = TimelineDataBuilder.pixelsPerDay(for: segment)
+        #expect(ppd == 40) // default fallback
+    }
+
+    @Test func pixelsPerDay_clampedToMin() {
+        let segment = TimelineSegment(
+            sessions: [session("2025-01-01"), session("2025-01-13")],
+            gapDaysAfter: nil
+        )
+        let ppd = TimelineDataBuilder.pixelsPerDay(for: segment)
+        #expect(ppd >= 20)
+        #expect(ppd <= 60)
+    }
+
+    @Test func pixelsPerDay_clampedToMax() {
+        // 1 day apart -> 400/1 = 400 -> clamped to 60
+        let segment = TimelineSegment(
+            sessions: [session("2025-01-01"), session("2025-01-02")],
+            gapDaysAfter: nil
+        )
+        let ppd = TimelineDataBuilder.pixelsPerDay(for: segment)
+        #expect(ppd == 60)
+    }
+
+    // MARK: - Days Between
+
+    @Test func daysBetween_sameDates() {
+        let d = date("2025-01-01")
+        #expect(TimelineDataBuilder.daysBetween(d, d) == 0)
+    }
+
+    @Test func daysBetween_oneDayApart() {
+        let a = date("2025-01-01")
+        let b = date("2025-01-02")
+        #expect(TimelineDataBuilder.daysBetween(a, b) == 1)
+    }
+
+    @Test func daysBetween_manyDaysApart() {
+        let a = date("2025-01-01")
+        let b = date("2025-04-01")
+        #expect(TimelineDataBuilder.daysBetween(a, b) == 90)
+    }
+
+    // MARK: - Year Helper
+
+    @Test func year_extractsCorrectly() {
+        #expect(TimelineDataBuilder.year(of: date("2025-06-15")) == 2025)
+        #expect(TimelineDataBuilder.year(of: date("2023-01-01")) == 2023)
+    }
+
+    // MARK: - Session Data Enrichment
+
+    @Test func buildSegments_carriesTeamData() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let game = Game(name: "TestGame", filePath: "/test.md")
+        context.insert(game)
+
+        let s = Session(date: date("2025-01-05"), activities: "Caught many Pokemon")
+        s.game = game
+        let member = TeamMember(pokemonName: "Pikachu", level: 50)
+        s.team.append(member)
+        context.insert(s)
+        context.insert(member)
+
+        try context.save()
+
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        #expect(segments.count == 1)
+        let ts = segments[0].sessions[0]
+        #expect(ts.teamMembers.count == 1)
+        #expect(ts.teamMembers[0] == "Pikachu")
+        #expect(ts.activities.contains("Caught"))
+    }
+
+    @Test func buildSegments_sessionHasFilePath_oldSessionNil() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let game = Game(name: "TestGame", filePath: "/test.md")
+        context.insert(game)
+
+        let s = Session(date: date("2025-01-05"), filePath: "games/purpur/sessions/2025-01-05.md")
+        s.game = game
+        context.insert(s)
+
+        let o = OldSession(date: date("2025-01-01"))
+        o.game = game
+        context.insert(o)
+
+        try context.save()
+
+        let segments = TimelineDataBuilder.buildSegments(from: game)
+        let sessions = segments[0].sessions
+        // sorted: old first (Jan 1), then session (Jan 5)
+        #expect(sessions[0].filePath == nil)
+        #expect(sessions[1].filePath == "games/purpur/sessions/2025-01-05.md")
+    }
+}
