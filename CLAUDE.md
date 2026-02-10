@@ -131,4 +131,6 @@ metacritic: 72
 
 ## Git Conventions
 
-- Keep commit messages short and concise (single line preferred)
+- Short subject line (~50 chars), e.g. "Redesign timeline view"
+- Body optional — use it when the "why" isn't obvious, skip it for trivial changes
+- Don't pad every commit with a body just because you can
