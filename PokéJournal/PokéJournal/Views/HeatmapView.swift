@@ -247,11 +247,10 @@ struct HeatmapPopoverView: View {
                     .lineLimit(4)
             }
 
-            if let vaultName, let filePath = day.filePath, !filePath.isEmpty {
+            if let filePath = day.filePath, !filePath.isEmpty {
                 Divider()
                 Button {
-                    let encoded = filePath.replacingOccurrences(of: " ", with: "%20")
-                    if let url = URL(string: "obsidian://open?vault=\(vaultName)&file=\(encoded)") {
+                    if let url = VaultManager.shared.obsidianURL(forFilePath: filePath) {
                         NSWorkspace.shared.open(url)
                     }
                 } label: {

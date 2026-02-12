@@ -106,4 +106,22 @@ final class VaultManager {
         vaultURL = nil
         UserDefaults.standard.removeObject(forKey: bookmarkKey)
     }
+
+    /// Converts an absolute file path to a vault-relative path for use in Obsidian URLs.
+    static func vaultRelativePath(absolutePath: String, vaultPath: String) -> String {
+        let normalized = vaultPath.hasSuffix("/") ? String(vaultPath.dropLast()) : vaultPath
+        guard absolutePath.hasPrefix(normalized) else { return absolutePath }
+        var relative = String(absolutePath.dropFirst(normalized.count))
+        if relative.hasPrefix("/") {
+            relative = String(relative.dropFirst())
+        }
+        return relative
+    }
+
+    func obsidianURL(forFilePath filePath: String) -> URL? {
+        guard let vaultName, let vaultPath = vaultURL?.path else { return nil }
+        let relativePath = Self.vaultRelativePath(absolutePath: filePath, vaultPath: vaultPath)
+        let encoded = relativePath.replacingOccurrences(of: " ", with: "%20")
+        return URL(string: "obsidian://open?vault=\(vaultName)&file=\(encoded)")
+    }
 }

@@ -951,6 +951,39 @@ struct TimelineDataTests {
     }
 }
 
+// MARK: - Obsidian Path Tests
+
+struct ObsidianPathTests {
+
+    @Test func vaultRelativePath_stripsVaultPrefix() {
+        let absolute = "/Users/testuser/Documents/Vault/hobbies/videospiele/pokemon/purpur/sessions/2025-01-01_purpur.md"
+        let vaultPath = "/Users/testuser/Documents/Vault"
+        let result = VaultManager.vaultRelativePath(absolutePath: absolute, vaultPath: vaultPath)
+        #expect(result == "hobbies/videospiele/pokemon/purpur/sessions/2025-01-01_purpur.md")
+    }
+
+    @Test func vaultRelativePath_handlesTrailingSlash() {
+        let absolute = "/Users/testuser/Vault/file.md"
+        let vaultPath = "/Users/testuser/Vault/"
+        let result = VaultManager.vaultRelativePath(absolutePath: absolute, vaultPath: vaultPath)
+        #expect(result == "file.md")
+    }
+
+    @Test func vaultRelativePath_returnsOriginalWhenNoMatch() {
+        let absolute = "/other/path/file.md"
+        let vaultPath = "/Users/testuser/Vault"
+        let result = VaultManager.vaultRelativePath(absolutePath: absolute, vaultPath: vaultPath)
+        #expect(result == "/other/path/file.md")
+    }
+
+    @Test func vaultRelativePath_handlesSpacesInPath() {
+        let absolute = "/Users/testuser/My Vault/hobbies/pokemon/session file.md"
+        let vaultPath = "/Users/testuser/My Vault"
+        let result = VaultManager.vaultRelativePath(absolutePath: absolute, vaultPath: vaultPath)
+        #expect(result == "hobbies/pokemon/session file.md")
+    }
+}
+
 // MARK: - DataLoader Clear & Reload Tests
 
 @Suite(.serialized)

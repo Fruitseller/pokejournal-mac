@@ -63,14 +63,16 @@ struct ContentView: View {
                     }
                 }
         } detail: {
-            if let game = selectedGame {
-                GameDetailView(game: game)
-            } else {
-                ContentUnavailableView(
-                    "Kein Spiel ausgewählt",
-                    systemImage: "gamecontroller",
-                    description: Text("Wähle ein Spiel aus der Seitenleiste")
-                )
+            NavigationStack {
+                if let game = selectedGame {
+                    GameDetailView(game: game)
+                } else {
+                    ContentUnavailableView(
+                        "Kein Spiel ausgewählt",
+                        systemImage: "gamecontroller",
+                        description: Text("Wähle ein Spiel aus der Seitenleiste")
+                    )
+                }
             }
         }
         .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 350)

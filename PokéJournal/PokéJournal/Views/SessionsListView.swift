@@ -8,17 +8,16 @@ import SwiftData
 
 struct SessionsListView: View {
     let game: Game
-    @State private var selectedSession: Session?
 
-    private var allSessions: [(date: Date, isOld: Bool, session: Any)] {
-        var combined: [(date: Date, isOld: Bool, session: Any)] = []
+    var allSessions: [AnySession] {
+        var combined: [AnySession] = []
 
         for session in game.sessions {
-            combined.append((session.date, false, session))
+            combined.append(.regular(session))
         }
 
         for oldSession in game.oldSessions {
-            combined.append((oldSession.date, true, oldSession))
+            combined.append(.old(oldSession))
         }
 
         return combined.sorted { $0.date > $1.date }
@@ -29,28 +28,38 @@ struct SessionsListView: View {
             Text("Sessions (\(allSessions.count))")
                 .font(.headline)
 
+            let sessions = allSessions
             LazyVStack(spacing: 8) {
-                ForEach(Array(allSessions.enumerated()), id: \.offset) { _, item in
-                    SessionRowView(
-                        date: item.date,
-                        isOld: item.isOld,
-                        hasTeam: hasTeam(item.session)
-                    )
+                ForEach(sessions) { session in
+                    NavigationLink(value: session) {
+                        SessionRowView(
+                            date: session.date,
+                            isOld: session.isOld,
+                            hasTeam: session.hasTeam
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
         .padding()
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .navigationDestination(for: AnySession.self) { session in
+            let sessions = allSessions
+            let previousTeam = previousTeam(for: session, in: sessions)
+            SessionDetailView(session: session, game: game, previousTeam: previousTeam)
+        }
     }
 
-    private func hasTeam(_ session: Any) -> Bool {
-        if let s = session as? Session {
-            return s.hasTeam
+    private func previousTeam(for session: AnySession, in sessions: [AnySession]) -> [TeamMember]? {
+        // sessions is sorted newest-first, so the "previous" session is the next one in the array
+        guard let index = sessions.firstIndex(of: session),
+              index + 1 < sessions.count else {
+            return nil
         }
-        if let o = session as? OldSession {
-            return o.hasTeam
-        }
-        return false
+        let previous = sessions[index + 1]
+        guard !previous.team.isEmpty else { return nil }
+        return previous.team
     }
 }
 
@@ -96,6 +105,8 @@ struct SessionRowView: View {
 
 #Preview {
     let game = Game(name: "test", filePath: "")
-    return SessionsListView(game: game)
-        .modelContainer(for: Game.self, inMemory: true)
+    return NavigationStack {
+        SessionsListView(game: game)
+    }
+    .modelContainer(for: Game.self, inMemory: true)
 }
