@@ -65,13 +65,12 @@ struct HeatmapView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
                 }
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
 
                 legendView
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
         .onAppear {
             grid = HeatmapDataBuilder.buildGrid(from: game)
         }

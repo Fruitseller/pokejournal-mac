@@ -55,7 +55,6 @@ struct TeamAnalysisView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -97,7 +96,7 @@ struct HallOfFameSection: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
                 }
             }
         }

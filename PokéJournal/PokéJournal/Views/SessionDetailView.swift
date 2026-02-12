@@ -76,7 +76,6 @@ struct SessionDetailView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func openInObsidian(filePath: String) {
@@ -189,7 +188,6 @@ struct TeamSectionView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -236,7 +234,7 @@ struct AnnotatedTeamMemberCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
         .overlay {
             if isNew {
                 RoundedRectangle(cornerRadius: 12)
@@ -275,7 +273,7 @@ struct RemovedTeamMemberCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
         .opacity(0.7)
         .overlay {
             RoundedRectangle(cornerRadius: 12)
@@ -303,7 +301,6 @@ struct TeamGridView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -323,7 +320,7 @@ struct SectionView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 

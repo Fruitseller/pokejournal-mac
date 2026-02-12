@@ -146,11 +146,10 @@ struct TimelineView: View {
                     .padding(.vertical, 20)
                     .padding(.horizontal, 16)
                 }
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 

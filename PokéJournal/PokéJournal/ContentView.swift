@@ -93,7 +93,7 @@ struct ContentView: View {
             if dataLoader.isLoading {
                 ProgressView("Lade Daten...")
                     .padding()
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
             }
         }
         .alert("Fehler", isPresented: .constant(dataLoader.error != nil)) {

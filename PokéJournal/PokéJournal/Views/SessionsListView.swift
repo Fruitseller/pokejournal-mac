@@ -43,7 +43,6 @@ struct SessionsListView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
         .navigationDestination(for: AnySession.self) { session in
             let sessions = allSessions
             let previousTeam = previousTeam(for: session, in: sessions)
@@ -98,7 +97,7 @@ struct SessionRowView: View {
                 .foregroundStyle(.tertiary)
         }
         .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 8))
         .contentShape(Rectangle())
     }
 }

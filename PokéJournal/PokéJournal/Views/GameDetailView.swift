@@ -89,7 +89,6 @@ struct GameHeaderView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -175,7 +174,7 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -196,7 +195,6 @@ struct CurrentTeamView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -218,7 +216,7 @@ struct TeamMemberCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
