@@ -164,13 +164,16 @@ struct HeatmapView: View {
                 .frame(width: Self.weekdayLabelWidth + Self.cellSpacing)
 
             ForEach(Array(monthSpans.enumerated()), id: \.offset) { _, span in
-                Text(span.name)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .frame(
-                        width: CGFloat(span.weekCount) * Self.stride,
-                        alignment: .leading
-                    )
+                let spanWidth = CGFloat(span.weekCount) * Self.stride
+                if span.weekCount >= 2 {
+                    Text(span.name)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: spanWidth, alignment: .leading)
+                } else {
+                    Color.clear
+                        .frame(width: spanWidth)
+                }
             }
         }
     }
