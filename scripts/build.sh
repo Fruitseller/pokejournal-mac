@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build and test script for PokéJournal
 
-cd "$(dirname "$0")/../PokéJournal"
+cd "$(dirname "$0")/../PokeJournal"
 
 SCHEME=$(xcodebuild -list 2>/dev/null | grep -A 1 'Schemes:' | tail -1 | xargs)
 

@@ -21,21 +21,21 @@
 			containerPortal = AE2C34DF2F2EBFF6006C94E1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = AE2C34E62F2EBFF6006C94E1;
-			remoteInfo = "PokéJournal";
+			remoteInfo = PokeJournal;
 		};
 		AE2C35012F2EBFF7006C94E1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AE2C34DF2F2EBFF6006C94E1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = AE2C34E62F2EBFF6006C94E1;
-			remoteInfo = "PokéJournal";
+			remoteInfo = PokeJournal;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AE2C34E72F2EBFF6006C94E1 /* PokéJournal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PokéJournal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AE2C34F62F2EBFF7006C94E1 /* PokéJournalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PokéJournalTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AE2C35002F2EBFF7006C94E1 /* PokéJournalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PokéJournalUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE2C34E72F2EBFF6006C94E1 /* PokeJournal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PokeJournal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE2C34F62F2EBFF7006C94E1 /* PokeJournalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokeJournalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE2C35002F2EBFF7006C94E1 /* PokeJournalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokeJournalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE2C35212F2EC08F006C94E1 /* PLAN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = PLAN.md; path = ../PLAN.md; sourceTree = SOURCE_ROOT; };
 		AEC7C9102F300E7300F8579B /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = CLAUDE.md; path = ../CLAUDE.md; sourceTree = SOURCE_ROOT; };
 		AEC7C9112F300E7300F8579B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
@@ -45,19 +45,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AE2C34E92F2EBFF6006C94E1 /* PokéJournal */ = {
+		AE2C34E92F2EBFF6006C94E1 /* PokeJournal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "PokéJournal";
+			path = PokeJournal;
 			sourceTree = "<group>";
 		};
-		AE2C34F92F2EBFF7006C94E1 /* PokéJournalTests */ = {
+		AE2C34F92F2EBFF7006C94E1 /* PokeJournalTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "PokéJournalTests";
+			path = PokeJournalTests;
 			sourceTree = "<group>";
 		};
-		AE2C35032F2EBFF7006C94E1 /* PokéJournalUITests */ = {
+		AE2C35032F2EBFF7006C94E1 /* PokeJournalUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "PokéJournalUITests";
+			path = PokeJournalUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -94,9 +94,9 @@
 				AEC7C9112F300E7300F8579B /* README.md */,
 				AEC7C9152F300E7300F8579B /* scripts */,
 				AE2C35212F2EC08F006C94E1 /* PLAN.md */,
-				AE2C34E92F2EBFF6006C94E1 /* PokéJournal */,
-				AE2C34F92F2EBFF7006C94E1 /* PokéJournalTests */,
-				AE2C35032F2EBFF7006C94E1 /* PokéJournalUITests */,
+				AE2C34E92F2EBFF6006C94E1 /* PokeJournal */,
+				AE2C34F92F2EBFF7006C94E1 /* PokeJournalTests */,
+				AE2C35032F2EBFF7006C94E1 /* PokeJournalUITests */,
 				AE2C34E82F2EBFF6006C94E1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -104,9 +104,9 @@
 		AE2C34E82F2EBFF6006C94E1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AE2C34E72F2EBFF6006C94E1 /* PokéJournal.app */,
-				AE2C34F62F2EBFF7006C94E1 /* PokéJournalTests.xctest */,
-				AE2C35002F2EBFF7006C94E1 /* PokéJournalUITests.xctest */,
+				AE2C34E72F2EBFF6006C94E1 /* PokeJournal.app */,
+				AE2C34F62F2EBFF7006C94E1 /* PokeJournalTests.xctest */,
+				AE2C35002F2EBFF7006C94E1 /* PokeJournalUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,31 +125,32 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AE2C34E62F2EBFF6006C94E1 /* PokéJournal */ = {
+		AE2C34E62F2EBFF6006C94E1 /* PokeJournal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AE2C350A2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournal" */;
+			buildConfigurationList = AE2C350A2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournal" */;
 			buildPhases = (
 				AE2C34E32F2EBFF6006C94E1 /* Sources */,
 				AE2C34E42F2EBFF6006C94E1 /* Frameworks */,
 				AE2C34E52F2EBFF6006C94E1 /* Resources */,
+				AE2C35302F3D0000006C94E1 /* Set Display Name */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AE2C34E92F2EBFF6006C94E1 /* PokéJournal */,
+				AE2C34E92F2EBFF6006C94E1 /* PokeJournal */,
 			);
-			name = "PokéJournal";
+			name = PokeJournal;
 			packageProductDependencies = (
 			);
-			productName = "PokéJournal";
-			productReference = AE2C34E72F2EBFF6006C94E1 /* PokéJournal.app */;
+			productName = PokeJournal;
+			productReference = AE2C34E72F2EBFF6006C94E1 /* PokeJournal.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AE2C34F52F2EBFF7006C94E1 /* PokéJournalTests */ = {
+		AE2C34F52F2EBFF7006C94E1 /* PokeJournalTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AE2C350D2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournalTests" */;
+			buildConfigurationList = AE2C350D2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournalTests" */;
 			buildPhases = (
 				AE2C34F22F2EBFF7006C94E1 /* Sources */,
 				AE2C34F32F2EBFF7006C94E1 /* Frameworks */,
@@ -161,18 +162,18 @@
 				AE2C34F82F2EBFF7006C94E1 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AE2C34F92F2EBFF7006C94E1 /* PokéJournalTests */,
+				AE2C34F92F2EBFF7006C94E1 /* PokeJournalTests */,
 			);
-			name = "PokéJournalTests";
+			name = PokeJournalTests;
 			packageProductDependencies = (
 			);
-			productName = "PokéJournalTests";
-			productReference = AE2C34F62F2EBFF7006C94E1 /* PokéJournalTests.xctest */;
+			productName = PokeJournalTests;
+			productReference = AE2C34F62F2EBFF7006C94E1 /* PokeJournalTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		AE2C34FF2F2EBFF7006C94E1 /* PokéJournalUITests */ = {
+		AE2C34FF2F2EBFF7006C94E1 /* PokeJournalUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AE2C35102F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournalUITests" */;
+			buildConfigurationList = AE2C35102F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournalUITests" */;
 			buildPhases = (
 				AE2C34FC2F2EBFF7006C94E1 /* Sources */,
 				AE2C34FD2F2EBFF7006C94E1 /* Frameworks */,
@@ -184,13 +185,13 @@
 				AE2C35022F2EBFF7006C94E1 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AE2C35032F2EBFF7006C94E1 /* PokéJournalUITests */,
+				AE2C35032F2EBFF7006C94E1 /* PokeJournalUITests */,
 			);
-			name = "PokéJournalUITests";
+			name = PokeJournalUITests;
 			packageProductDependencies = (
 			);
-			productName = "PokéJournalUITests";
-			productReference = AE2C35002F2EBFF7006C94E1 /* PokéJournalUITests.xctest */;
+			productName = PokeJournalUITests;
+			productReference = AE2C35002F2EBFF7006C94E1 /* PokeJournalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -216,7 +217,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AE2C34E22F2EBFF6006C94E1 /* Build configuration list for PBXProject "PokéJournal" */;
+			buildConfigurationList = AE2C34E22F2EBFF6006C94E1 /* Build configuration list for PBXProject "PokeJournal" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -230,9 +231,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AE2C34E62F2EBFF6006C94E1 /* PokéJournal */,
-				AE2C34F52F2EBFF7006C94E1 /* PokéJournalTests */,
-				AE2C34FF2F2EBFF7006C94E1 /* PokéJournalUITests */,
+				AE2C34E62F2EBFF6006C94E1 /* PokeJournal */,
+				AE2C34F52F2EBFF7006C94E1 /* PokeJournalTests */,
+				AE2C34FF2F2EBFF7006C94E1 /* PokeJournalUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -267,6 +268,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		AE2C35302F3D0000006C94E1 /* Set Display Name */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Set Display Name";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/libexec/PlistBuddy -c \"Set :CFBundleName PokéJournal\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		AE2C34E32F2EBFF6006C94E1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -294,12 +313,12 @@
 /* Begin PBXTargetDependency section */
 		AE2C34F82F2EBFF7006C94E1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AE2C34E62F2EBFF6006C94E1 /* PokéJournal */;
+			target = AE2C34E62F2EBFF6006C94E1 /* PokeJournal */;
 			targetProxy = AE2C34F72F2EBFF7006C94E1 /* PBXContainerItemProxy */;
 		};
 		AE2C35022F2EBFF7006C94E1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AE2C34E62F2EBFF6006C94E1 /* PokéJournal */;
+			target = AE2C34E62F2EBFF6006C94E1 /* PokeJournal */;
 			targetProxy = AE2C35012F2EBFF7006C94E1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -438,6 +457,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -471,6 +491,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -508,7 +529,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PokéJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PokéJournal";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PokeJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PokeJournal";
 			};
 			name = Debug;
 		};
@@ -529,7 +550,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PokéJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PokéJournal";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PokeJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PokeJournal";
 			};
 			name = Release;
 		};
@@ -548,7 +569,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "PokéJournal";
+				TEST_TARGET_NAME = PokeJournal;
 			};
 			name = Debug;
 		};
@@ -567,14 +588,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "PokéJournal";
+				TEST_TARGET_NAME = PokeJournal;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AE2C34E22F2EBFF6006C94E1 /* Build configuration list for PBXProject "PokéJournal" */ = {
+		AE2C34E22F2EBFF6006C94E1 /* Build configuration list for PBXProject "PokeJournal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AE2C35082F2EBFF7006C94E1 /* Debug */,
@@ -583,7 +604,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AE2C350A2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournal" */ = {
+		AE2C350A2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AE2C350B2F2EBFF7006C94E1 /* Debug */,
@@ -592,7 +613,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AE2C350D2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournalTests" */ = {
+		AE2C350D2F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournalTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AE2C350E2F2EBFF7006C94E1 /* Debug */,
@@ -601,7 +622,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AE2C35102F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokéJournalUITests" */ = {
+		AE2C35102F2EBFF7006C94E1 /* Build configuration list for PBXNativeTarget "PokeJournalUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AE2C35112F2EBFF7006C94E1 /* Debug */,

@@ -71,5 +71,5 @@ fastlane/test_output
 .claude/settings.local.json
 
 # Pokemon data and sprites (generated via scripts/fetch_pokemon_data.py)
-PokéJournal/PokéJournal/Assets.xcassets/Sprites/
-PokéJournal/PokéJournal/Resources/pokemon.json
+PokeJournal/PokeJournal/Assets.xcassets/Sprites/
+PokeJournal/PokeJournal/Resources/pokemon.json

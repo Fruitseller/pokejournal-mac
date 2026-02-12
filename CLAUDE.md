@@ -31,11 +31,11 @@ Options:
 ./scripts/test.sh test   # Run all tests (including UI tests)
 
 # Or using xcodebuild directly
-xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" build
-xcodebuild -project "PokéJournal/PokéJournal.xcodeproj" -scheme "PokéJournal" test
+xcodebuild -project "PokeJournal/PokeJournal.xcodeproj" -scheme "PokeJournal" build
+xcodebuild -project "PokeJournal/PokeJournal.xcodeproj" -scheme "PokeJournal" test
 
 # Build and run (typically done via Xcode ⌘R)
-open "PokéJournal/PokéJournal.xcodeproj"
+open "PokeJournal/PokeJournal.xcodeproj"
 ```
 
 ## Build & Test Loops

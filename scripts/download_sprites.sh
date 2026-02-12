@@ -2,7 +2,7 @@
 # Downloads Pokemon sprites and creates asset catalog structure
 
 SCRIPT_DIR="$(dirname "$0")"
-PROJECT_DIR="$SCRIPT_DIR/../PokéJournal/PokéJournal"
+PROJECT_DIR="$SCRIPT_DIR/../PokeJournal/PokeJournal"
 ASSETS_DIR="$PROJECT_DIR/Assets.xcassets/Sprites"
 JSON_FILE="$PROJECT_DIR/Resources/pokemon.json"
 

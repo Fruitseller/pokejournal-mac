@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Configuration
 SCRIPT_DIR = Path(__file__).parent
-PROJECT_DIR = SCRIPT_DIR.parent / "PokéJournal" / "PokéJournal"
+PROJECT_DIR = SCRIPT_DIR.parent / "PokeJournal" / "PokeJournal"
 RESOURCES_DIR = PROJECT_DIR / "Resources"
 ASSETS_DIR = PROJECT_DIR / "Assets.xcassets" / "Sprites"
 

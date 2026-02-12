@@ -45,7 +45,7 @@ A native macOS app for visualizing and analyzing Pokémon gaming sessions from y
 
 3. **Open in Xcode and run**
    ```bash
-   open PokéJournal/PokéJournal.xcodeproj
+   open PokeJournal/PokeJournal.xcodeproj
    ```
    Press ⌘R to build and run.
 

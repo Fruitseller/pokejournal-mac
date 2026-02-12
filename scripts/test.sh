@@ -16,7 +16,7 @@ case "${1:-test}" in
         ;;
     unit)
         # Only run unit tests, skip UI tests
-        xcodebuild -project "$PROJECT" -scheme "$SCHEME" test -only-testing:PokéJournalTests
+        xcodebuild -project "$PROJECT" -scheme "$SCHEME" test -only-testing:PokeJournalTests
         ;;
     *)
         echo "Usage: $0 [build|test|unit]"
