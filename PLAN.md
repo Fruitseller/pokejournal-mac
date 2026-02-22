@@ -11,9 +11,17 @@ Geplante Features für zukünftige Versionen.
 ## v1.2 - Team-Entwicklung
 
 - **Level-Progression Chart** - Liniendiagramm der Level-Entwicklung pro Pokémon über alle Sessions (Swift Charts)
-- [Detailplan](plans/team-evolution.md)
+- [Detailplan](plans/done/team-evolution.md)
 
-## v1.3 - Filter & Suche
+## v1.3 - Entwicklungslinien
+
+- **Entwicklungslinien als Einheit** - Glumanda/Glutexo/Glurak gelten überall als eine Einheit
+- Team-Analyse zählt die ganze Linie zusammen
+- Level-Chart führt die Linie bei Entwicklung fort
+- Session-Detail zeigt "Entwickelt"-Badge statt "Neu"/"Entfernt"
+- [Detailplan](plans/evolution-lines.md)
+
+## v1.4 - Filter & Suche
 
 - **Timeline-Filter** - Nach Zeitraum filtern, nur Sessions mit Team-Änderungen
 - **Pokémon-Suche** - Finde alle Sessions in denen ein bestimmtes Pokémon im Team war
