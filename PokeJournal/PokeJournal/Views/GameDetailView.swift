@@ -26,6 +26,7 @@ struct GameDetailView: View {
                     Text("Timeline").tag(1)
                     Text("Heatmap").tag(2)
                     Text("Team-Analyse").tag(3)
+                    Text("Team-Entwicklung").tag(4)
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
@@ -39,6 +40,8 @@ struct GameDetailView: View {
                     HeatmapView(game: game)
                 case 3:
                     TeamAnalysisView(game: game)
+                case 4:
+                    TeamEvolutionView(game: game)
                 default:
                     EmptyView()
                 }
