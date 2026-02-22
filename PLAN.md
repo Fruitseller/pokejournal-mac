@@ -2,17 +2,16 @@
 
 Geplante Features für zukünftige Versionen.
 
-## v1.1 - Session-Detailansicht
+## Erledigt
 
-- **Session-Detail bei Klick** - Klick auf Session in der Liste zeigt Detailansicht mit Team, Aktivitäten, Pläne, Gedanken
-- **Team-Veränderungen** - Diff zur vorherigen Session (neue/entfernte Pokémon, Level-Ups)
-- **OldSession-Support** - Auch alte Sessions klickbar (ohne Obsidian-Link)
-- [Detailplan](plans/session-detail.md)
+- **v1.1 - Session-Detailansicht** - Klickbare Sessions mit Team-Diff ([Plan](plans/done/session-detail.md))
+- **Heatmap** - GitHub-Style Aktivitäts-Kalender ([Plan](plans/done/heatmap.md))
+- **Timeline Redesign** - Proportionale Abstände, Schnitte bei Pausen ([Plan](plans/done/timeline-redesign.md))
 
-## v1.2 - Statistiken
+## v1.2 - Team-Entwicklung
 
-- **Level-Progression Graph** - Visualisierung der Level-Entwicklung pro Pokémon über alle Sessions
-- **Team-Entwicklung Timeline** - Wie hat sich das Team über die Zeit verändert?
+- **Level-Progression Chart** - Liniendiagramm der Level-Entwicklung pro Pokémon über alle Sessions (Swift Charts)
+- [Detailplan](plans/team-evolution.md)
 
 ## v1.3 - Filter & Suche
 
