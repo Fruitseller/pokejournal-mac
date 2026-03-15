@@ -34,7 +34,7 @@ enum TimelineDataBuilder {
         for s in game.sessions {
             allSessions.append(TimelineSession(
                 date: s.date,
-                teamMembers: s.team.map(\.displayName),
+                teamMembers: s.orderedTeam.map(\.displayName),
                 activities: s.activities,
                 filePath: s.filePath
             ))
@@ -43,7 +43,7 @@ enum TimelineDataBuilder {
         for o in game.oldSessions {
             allSessions.append(TimelineSession(
                 date: o.date,
-                teamMembers: o.team.map(\.displayName),
+                teamMembers: o.orderedTeam.map(\.displayName),
                 activities: o.activities,
                 filePath: nil
             ))

@@ -32,6 +32,10 @@ final class Session {
         date.formatted(date: .long, time: .omitted)
     }
 
+    var orderedTeam: [TeamMember] {
+        team.sorted { $0.order < $1.order }
+    }
+
     var hasTeam: Bool {
         !team.isEmpty
     }

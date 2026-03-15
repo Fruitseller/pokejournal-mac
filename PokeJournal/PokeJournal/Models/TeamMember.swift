@@ -11,6 +11,7 @@ final class TeamMember {
     var pokemonName: String
     var level: Int
     var variant: String?
+    var order: Int = 0
 
     @Relationship(inverse: \Session.team)
     var session: Session?

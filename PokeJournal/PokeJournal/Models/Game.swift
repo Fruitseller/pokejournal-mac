@@ -46,10 +46,10 @@ final class Game {
 
     var currentTeam: [TeamMember] {
         if let latestSession = sessions.sorted(by: { $0.date > $1.date }).first, !latestSession.team.isEmpty {
-            return latestSession.team
+            return latestSession.orderedTeam
         }
         if let latestOldSession = oldSessions.sorted(by: { $0.date > $1.date }).first {
-            return latestOldSession.team
+            return latestOldSession.orderedTeam
         }
         return []
     }

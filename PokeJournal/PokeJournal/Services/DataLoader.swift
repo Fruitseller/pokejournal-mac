@@ -126,12 +126,13 @@ final class DataLoader {
             )
             oldSession.game = game
 
-            for member in parsed.team {
+            for (index, member) in parsed.team.enumerated() {
                 let teamMember = TeamMember(
                     pokemonName: member.name,
                     level: member.level,
                     variant: member.variant
                 )
+                teamMember.order = index
                 teamMember.oldSession = oldSession
                 oldSession.team.append(teamMember)
                 context.insert(teamMember)
@@ -166,12 +167,13 @@ final class DataLoader {
             )
             session.game = game
 
-            for member in teamMembers {
+            for (index, member) in teamMembers.enumerated() {
                 let teamMember = TeamMember(
                     pokemonName: member.name,
                     level: member.level,
                     variant: member.variant
                 )
+                teamMember.order = index
                 teamMember.session = session
                 session.team.append(teamMember)
                 context.insert(teamMember)
@@ -196,12 +198,13 @@ final class DataLoader {
             )
             oldSession.game = game
 
-            for member in parsed.team {
+            for (index, member) in parsed.team.enumerated() {
                 let teamMember = TeamMember(
                     pokemonName: member.name,
                     level: member.level,
                     variant: member.variant
                 )
+                teamMember.order = index
                 teamMember.oldSession = oldSession
                 oldSession.team.append(teamMember)
                 context.insert(teamMember)

@@ -47,8 +47,8 @@ enum AnySession: Hashable, Identifiable {
 
     var team: [TeamMember] {
         switch self {
-        case .regular(let s): return s.team
-        case .old(let o): return o.team
+        case .regular(let s): return s.orderedTeam
+        case .old(let o): return o.orderedTeam
         }
     }
 

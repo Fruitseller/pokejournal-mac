@@ -13,7 +13,7 @@ struct TeamAnalysisView: View {
         var usage: [String: (count: Int, maxLevel: Int)] = [:]
 
         for session in game.sessions {
-            for member in session.team {
+            for member in session.orderedTeam {
                 let key = member.displayName
                 let current = usage[key] ?? (0, 0)
                 usage[key] = (current.count + 1, max(current.maxLevel, member.level))
@@ -21,7 +21,7 @@ struct TeamAnalysisView: View {
         }
 
         for oldSession in game.oldSessions {
-            for member in oldSession.team {
+            for member in oldSession.orderedTeam {
                 let key = member.displayName
                 let current = usage[key] ?? (0, 0)
                 usage[key] = (current.count + 1, max(current.maxLevel, member.level))
