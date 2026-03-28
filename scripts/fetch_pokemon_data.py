@@ -91,6 +91,9 @@ def main():
     print("  Loading types.csv...")
     type_names_csv = fetch_csv(f"{CSV_BASE}/types.csv")
 
+    print("  Loading pokemon_species.csv...")
+    species_csv = fetch_csv(f"{CSV_BASE}/pokemon_species.csv")
+
     # Build lookup tables
     # German names (language_id 6 = German)
     german_names = {
@@ -104,6 +107,13 @@ def main():
         row['pokemon_species_id']: row['name']
         for row in names_csv
         if row['local_language_id'] == '9'
+    }
+
+    # Evolution chain ID per species
+    evolution_chains = {
+        row['id']: int(row['evolution_chain_id'])
+        for row in species_csv
+        if row.get('evolution_chain_id')
     }
 
     # Type ID to name mapping
@@ -134,7 +144,8 @@ def main():
             "name_en": english_names.get(species_id, row['identifier'].title()),
             "types": pokemon_types.get(pid, []),
             "sprite_url": f"{SPRITE_BASE}/other/official-artwork/{pid}.png",
-            "sprite_pixel_url": f"{SPRITE_BASE}/{pid}.png"
+            "sprite_pixel_url": f"{SPRITE_BASE}/{pid}.png",
+            "evolution_chain_id": evolution_chains.get(species_id)
         })
 
     # Sort and limit

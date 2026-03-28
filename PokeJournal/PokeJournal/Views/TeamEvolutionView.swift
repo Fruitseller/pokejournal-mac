@@ -70,8 +70,17 @@ struct FilterBar: View {
             .disabled(hiddenPokemon.isEmpty)
 
             Button("Aktuelles Team") {
+                let db = PokemonDatabase.shared
                 let allNames = Set(timelines.map(\.displayName))
-                hiddenPokemon = allNames.subtracting(currentTeamNames)
+                // Match via evolution lines: a timeline matches if any current team member
+                // is in the same evolution line as the timeline's pokemon
+                let matching = Set(timelines.filter { timeline in
+                    currentTeamNames.contains { teamName in
+                        db.sameEvolutionLine(timeline.pokemonName, teamName)
+                        || timeline.displayName == teamName
+                    }
+                }.map(\.displayName))
+                hiddenPokemon = allNames.subtracting(matching)
             }
             .buttonStyle(.borderless)
 
@@ -113,6 +122,7 @@ struct TeamEvolutionChart: View {
     struct HoveredDataPoint {
         let pokemonName: String
         let pokemonID: Int?
+        let timelineName: String
         let typeColor: Color
         let level: Int
         let date: Date
@@ -239,7 +249,7 @@ struct TeamEvolutionChart: View {
                             let point = findClosestPoint(at: location, proxy: proxy, geo: geo)
                             hoveredPoint = point
                             if pinnedPokemon == nil {
-                                highlightedPokemon = point?.pokemonName
+                                highlightedPokemon = point?.timelineName
                             }
                         case .ended:
                             hoveredPoint = nil
@@ -249,7 +259,7 @@ struct TeamEvolutionChart: View {
                         }
                     }
                     .onTapGesture {
-                        if let hovered = hoveredPoint?.pokemonName {
+                        if let hovered = hoveredPoint?.timelineName {
                             if pinnedPokemon == hovered {
                                 // Unpin
                                 pinnedPokemon = nil
@@ -382,8 +392,9 @@ struct TeamEvolutionChart: View {
                     if dist < closestDistance && dist < maxHitDistance {
                         closestDistance = dist
                         closest = HoveredDataPoint(
-                            pokemonName: timeline.displayName,
-                            pokemonID: timeline.pokemonID,
+                            pokemonName: point.pokemonName ?? timeline.displayName,
+                            pokemonID: point.pokemonID ?? timeline.pokemonID,
+                            timelineName: timeline.displayName,
                             typeColor: timeline.typeColor,
                             level: point.level,
                             date: point.date,
@@ -427,6 +438,7 @@ struct TeamEvolutionChart: View {
                     closest = HoveredDataPoint(
                         pokemonName: timeline.displayName,
                         pokemonID: timeline.pokemonID,
+                        timelineName: timeline.displayName,
                         typeColor: timeline.typeColor,
                         level: Int(interpolatedLevel),
                         date: date,

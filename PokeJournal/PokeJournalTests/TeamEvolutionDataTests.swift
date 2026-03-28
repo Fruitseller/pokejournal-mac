@@ -12,11 +12,15 @@ import SwiftData
 
 struct TeamEvolutionSegmentTests {
 
+    private func appearance(_ dateStr: String, level: Int, index: Int, name: String = "Test") -> (date: Date, level: Int, sessionIndex: Int, pokemonName: String, pokemonID: Int?) {
+        (date: date(dateStr), level: level, sessionIndex: index, pokemonName: name, pokemonID: nil)
+    }
+
     @Test func buildSegments_continuousPresence_oneSeg() {
         let appearances = [
-            (date: date("2025-01-01"), level: 10, sessionIndex: 0),
-            (date: date("2025-01-02"), level: 15, sessionIndex: 1),
-            (date: date("2025-01-03"), level: 20, sessionIndex: 2),
+            appearance("2025-01-01", level: 10, index: 0),
+            appearance("2025-01-02", level: 15, index: 1),
+            appearance("2025-01-03", level: 20, index: 2),
         ]
 
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 3)
@@ -28,11 +32,11 @@ struct TeamEvolutionSegmentTests {
 
     @Test func buildSegments_gapInMiddle_twoSegments() {
         let appearances = [
-            (date: date("2025-01-01"), level: 10, sessionIndex: 0),
-            (date: date("2025-01-02"), level: 15, sessionIndex: 1),
+            appearance("2025-01-01", level: 10, index: 0),
+            appearance("2025-01-02", level: 15, index: 1),
             // Gap: sessionIndex 2 and 3 missing
-            (date: date("2025-01-05"), level: 25, sessionIndex: 4),
-            (date: date("2025-01-06"), level: 30, sessionIndex: 5),
+            appearance("2025-01-05", level: 25, index: 4),
+            appearance("2025-01-06", level: 30, index: 5),
         ]
 
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 6)
@@ -45,7 +49,7 @@ struct TeamEvolutionSegmentTests {
 
     @Test func buildSegments_singleAppearance() {
         let appearances = [
-            (date: date("2025-01-05"), level: 42, sessionIndex: 3),
+            appearance("2025-01-05", level: 42, index: 3),
         ]
 
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 10)
@@ -55,18 +59,18 @@ struct TeamEvolutionSegmentTests {
     }
 
     @Test func buildSegments_empty() {
-        let appearances: [(date: Date, level: Int, sessionIndex: Int)] = []
+        let appearances: [(date: Date, level: Int, sessionIndex: Int, pokemonName: String, pokemonID: Int?)] = []
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 5)
         #expect(segments.isEmpty)
     }
 
     @Test func buildSegments_multipleGaps_threeSegments() {
         let appearances = [
-            (date: date("2025-01-01"), level: 10, sessionIndex: 0),
+            appearance("2025-01-01", level: 10, index: 0),
             // gap
-            (date: date("2025-01-03"), level: 20, sessionIndex: 2),
+            appearance("2025-01-03", level: 20, index: 2),
             // gap
-            (date: date("2025-01-05"), level: 30, sessionIndex: 4),
+            appearance("2025-01-05", level: 30, index: 4),
         ]
 
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 5)
@@ -79,12 +83,23 @@ struct TeamEvolutionSegmentTests {
     @Test func buildSegments_consecutiveIndices_noGap() {
         // sessionIndex 3,4 are consecutive — no gap
         let appearances = [
-            (date: date("2025-01-04"), level: 50, sessionIndex: 3),
-            (date: date("2025-01-05"), level: 55, sessionIndex: 4),
+            appearance("2025-01-04", level: 50, index: 3),
+            appearance("2025-01-05", level: 55, index: 4),
         ]
 
         let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 10)
         #expect(segments.count == 1)
+    }
+
+    @Test func buildSegments_carriesPokemonIdentity() {
+        let appearances = [
+            appearance("2025-01-01", level: 10, index: 0, name: "Glumanda"),
+            appearance("2025-01-02", level: 20, index: 1, name: "Glutexo"),
+        ]
+
+        let segments = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 2)
+        #expect(segments[0].dataPoints[0].pokemonName == "Glumanda")
+        #expect(segments[0].dataPoints[1].pokemonName == "Glutexo")
     }
 
     private func date(_ str: String) -> Date {

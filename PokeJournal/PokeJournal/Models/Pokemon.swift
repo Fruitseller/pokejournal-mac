@@ -12,6 +12,7 @@ struct Pokemon: Codable, Identifiable, Hashable {
     let types: [String]
     let spriteURL: String?
     let spritePixelURL: String?
+    let evolutionChainID: Int?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -20,6 +21,7 @@ struct Pokemon: Codable, Identifiable, Hashable {
         case types
         case spriteURL = "sprite_url"
         case spritePixelURL = "sprite_pixel_url"
+        case evolutionChainID = "evolution_chain_id"
     }
 
     var primaryType: String {
@@ -32,6 +34,7 @@ class PokemonDatabase {
 
     private var pokemon: [Pokemon] = []
     private var nameLookup: [String: Pokemon] = [:]
+    private var chainLookup: [Int: [Pokemon]] = [:]
 
     private init() {
         loadPokemonData()
@@ -50,6 +53,18 @@ class PokemonDatabase {
             nameLookup[poke.nameDE.lowercased()] = poke
             nameLookup[poke.nameEN.lowercased()] = poke
         }
+
+        // Build evolution chain lookup: chainID -> sorted members (by Pokemon ID)
+        var chains: [Int: [Pokemon]] = [:]
+        for poke in pokemon {
+            if let chainID = poke.evolutionChainID {
+                chains[chainID, default: []].append(poke)
+            }
+        }
+        for key in chains.keys {
+            chains[key]?.sort { $0.id < $1.id }
+        }
+        chainLookup = chains
     }
 
     func find(byName name: String) -> Pokemon? {
@@ -116,6 +131,38 @@ class PokemonDatabase {
         }
 
         return matrix[m][n]
+    }
+
+    func evolutionLine(for pokemon: Pokemon) -> [Pokemon] {
+        guard let chainID = pokemon.evolutionChainID,
+              let members = chainLookup[chainID] else {
+            return [pokemon]
+        }
+        return members
+    }
+
+    func sameEvolutionLine(_ name1: String, _ name2: String) -> Bool {
+        guard let p1 = find(byName: name1),
+              let p2 = find(byName: name2),
+              let chain1 = p1.evolutionChainID,
+              let chain2 = p2.evolutionChainID else {
+            return false
+        }
+        return chain1 == chain2
+    }
+
+    /// Returns a grouping key for a team member based on evolution line.
+    /// Variant Pokemon (e.g. "Alola Raichu") get their own key.
+    func evolutionLineKey(for pokemonName: String, variant: String?) -> String {
+        if variant != nil {
+            if let v = variant { return "\(v) \(pokemonName)" }
+        }
+        if let pokemon = find(byName: pokemonName),
+           let chainID = pokemon.evolutionChainID {
+            let line = evolutionLine(for: pokemon)
+            if let baseName = line.first?.nameDE { return baseName }
+        }
+        return pokemonName
     }
 
     func allPokemon() -> [Pokemon] {

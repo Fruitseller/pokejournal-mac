@@ -87,7 +87,7 @@ On failures: Analyze output → fix tests/code → re-run.
 ### Data Models (`Models/`)
 - **Game** → Sessions (1:n) + OldSessions (1:n), with cascade delete
 - **Session/OldSession** → TeamMembers (1:n)
-- **Pokemon** - Struct (not persisted), loaded from `pokemon.json`, includes fuzzy name matching
+- **Pokemon** - Struct (not persisted), loaded from `pokemon.json`, includes fuzzy name matching and evolution chain grouping (`evolutionChainID`)
 
 ### Views (`Views/`)
 - **ContentView** - NavigationSplitView root with sidebar/detail

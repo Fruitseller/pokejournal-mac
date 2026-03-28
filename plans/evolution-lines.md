@@ -1,6 +1,6 @@
 # Entwicklungslinien als Einheit behandeln
 
-**Status:** Geplant
+**Status:** Implementiert
 
 ## Übersicht
 

@@ -33,6 +33,8 @@ struct PokemonTimeline: Identifiable {
         let id = UUID()
         let date: Date
         let level: Int
+        let pokemonName: String?
+        let pokemonID: Int?
     }
 }
 
@@ -40,37 +42,49 @@ enum TeamEvolutionDataBuilder {
 
     static func buildTimelines(from game: Game) -> [PokemonTimeline] {
         let sessions = allSessionsSorted(from: game)
+        let db = PokemonDatabase.shared
 
         guard !sessions.isEmpty else { return [] }
 
-        // Collect data points per Pokémon (keyed by displayName)
+        // Collect data points grouped by evolution line (or displayName for variants/unknowns)
         var pokemonData: [String: (
-            pokemonName: String,
+            latestPokemonName: String,
+            latestPokemonID: Int?,
             variant: String?,
-            appearances: [(date: Date, level: Int, sessionIndex: Int)]
+            appearances: [(date: Date, level: Int, sessionIndex: Int, pokemonName: String, pokemonID: Int?)]
         )] = [:]
 
         for (index, session) in sessions.enumerated() {
             for member in session.team {
-                let key = member.displayName
+                let resolvedPokemon = db.find(byName: member.pokemonName)
+                let key = evolutionLineKey(for: member, db: db)
+
                 if pokemonData[key] == nil {
                     pokemonData[key] = (
-                        pokemonName: member.pokemonName,
+                        latestPokemonName: member.pokemonName,
+                        latestPokemonID: resolvedPokemon?.id,
                         variant: member.variant,
                         appearances: []
                     )
+                } else {
+                    // Update to latest seen form
+                    pokemonData[key]?.latestPokemonName = member.pokemonName
+                    pokemonData[key]?.latestPokemonID = resolvedPokemon?.id
                 }
+
                 pokemonData[key]?.appearances.append((
                     date: session.date,
                     level: member.level,
-                    sessionIndex: index
+                    sessionIndex: index,
+                    pokemonName: member.pokemonName,
+                    pokemonID: resolvedPokemon?.id
                 ))
             }
         }
 
         // Build timelines
-        return pokemonData.map { (key, data) in
-            let pokemon = PokemonDatabase.shared.find(byName: data.pokemonName)
+        return pokemonData.map { (_, data) in
+            let pokemon = db.find(byName: data.latestPokemonName)
             let typeColor = pokemon.map { PokemonTypeColor.color(for: $0.primaryType) } ?? .gray
 
             let segments = buildSegments(
@@ -79,9 +93,9 @@ enum TeamEvolutionDataBuilder {
             )
 
             return PokemonTimeline(
-                pokemonName: data.pokemonName,
+                pokemonName: data.latestPokemonName,
                 variant: data.variant,
-                pokemonID: pokemon?.id,
+                pokemonID: data.latestPokemonID,
                 typeColor: typeColor,
                 segments: segments,
                 firstAppearance: data.appearances.first!.date,
@@ -89,6 +103,10 @@ enum TeamEvolutionDataBuilder {
             )
         }
         .sorted { $0.firstAppearance < $1.firstAppearance }
+    }
+
+    private static func evolutionLineKey(for member: TeamMember, db: PokemonDatabase) -> String {
+        db.evolutionLineKey(for: member.pokemonName, variant: member.variant)
     }
 
     // MARK: - Internal
@@ -108,7 +126,7 @@ enum TeamEvolutionDataBuilder {
 
     /// Splits appearances into segments — a gap of >1 session index means the Pokémon left and returned.
     static func buildSegments(
-        from appearances: [(date: Date, level: Int, sessionIndex: Int)],
+        from appearances: [(date: Date, level: Int, sessionIndex: Int, pokemonName: String, pokemonID: Int?)],
         totalSessionCount: Int
     ) -> [PokemonTimeline.TimelineSegment] {
         guard !appearances.isEmpty else { return [] }
@@ -117,7 +135,12 @@ enum TeamEvolutionDataBuilder {
         var currentPoints: [PokemonTimeline.DataPoint] = []
 
         for (i, appearance) in appearances.enumerated() {
-            let point = PokemonTimeline.DataPoint(date: appearance.date, level: appearance.level)
+            let point = PokemonTimeline.DataPoint(
+                date: appearance.date,
+                level: appearance.level,
+                pokemonName: appearance.pokemonName,
+                pokemonID: appearance.pokemonID
+            )
 
             if i > 0 {
                 let previousIndex = appearances[i - 1].sessionIndex
