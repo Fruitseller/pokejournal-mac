@@ -4,7 +4,7 @@ A native macOS app for visualizing and analyzing Pokémon gaming sessions from y
 
 ![macOS](https://img.shields.io/badge/macOS-26%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-Unlicense-green)
 
 ## Philosophy
 
@@ -109,6 +109,6 @@ Thoughts and notes...
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Unlicense - see [LICENSE](LICENSE) for details.
 
 Pokémon and Pokémon character names are trademarks of Nintendo. This project is not affiliated with or endorsed by Nintendo, Game Freak, or The Pokémon Company.
