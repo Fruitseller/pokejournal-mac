@@ -6,6 +6,12 @@ A native macOS app for visualizing and analyzing Pokémon gaming sessions from y
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange)
 ![License](https://img.shields.io/badge/License-Unlicense-green)
 
+## Screenshots
+
+| Sessions | Team Analysis |
+|----------|---------------|
+| ![Sessions Overview](screenshots/sessions-overview.png) | ![Team Analysis](screenshots/team-analysis.png) |
+
 ## Philosophy
 
 - **Local-first** - Your data stays in your Obsidian vault. No cloud, no sync, no account.
