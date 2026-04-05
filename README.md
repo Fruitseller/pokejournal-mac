@@ -100,6 +100,18 @@ Thoughts and notes...
 - Aloha Raichu lvl 42
 ```
 
+## Building a Standalone App
+
+```bash
+# Archive and export to ~/Applications
+./scripts/build.sh archive
+
+# Or to a custom directory
+./scripts/build.sh archive ~/Desktop
+```
+
+On first launch: right-click → Open (the app is not notarized). No Apple Developer membership required.
+
 ## Tech Stack
 
 - **SwiftUI** - Declarative UI framework
