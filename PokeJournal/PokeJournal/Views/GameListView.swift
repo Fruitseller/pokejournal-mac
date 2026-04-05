@@ -9,6 +9,7 @@ import SwiftData
 struct GameListView: View {
     @Query(sort: \Game.name) private var games: [Game]
     @Binding var selectedGame: Game?
+    @Environment(\.openWindow) private var openWindow
 
     private var filteredGames: [Game] {
         games.filter { !$0.isHidden && Game.isRPGGenre($0.genre) }
@@ -21,6 +22,10 @@ struct GameListView: View {
                     .tag(game)
                     .accessibilityIdentifier("gameRow_\(game.name)")
                     .contextMenu {
+                        Button("In neuem Fenster öffnen") {
+                            openWindow(id: "game", value: game.name)
+                        }
+                        Divider()
                         Button("Ausblenden") {
                             game.isHidden = true
                             if selectedGame == game {

@@ -8,47 +8,58 @@ import SwiftData
 
 struct GameDetailView: View {
     let game: Game
-    @State private var selectedTab = 0
+    @SceneStorage("selectedTab") private var selectedTab = 0
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                GameHeaderView(game: game)
-
-                StatsCardsView(game: game)
-
-                if !game.currentTeam.isEmpty {
-                    CurrentTeamView(team: game.currentTeam)
-                }
-
-                Picker("Ansicht", selection: $selectedTab) {
-                    Text("Sessions").tag(0)
-                    Text("Timeline").tag(1)
-                    Text("Heatmap").tag(2)
-                    Text("Team-Analyse").tag(3)
-                    Text("Team-Entwicklung").tag(4)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-
-                switch selectedTab {
-                case 0:
-                    SessionsListView(game: game)
-                case 1:
-                    TimelineView(game: game)
-                case 2:
-                    HeatmapView(game: game)
-                case 3:
-                    TeamAnalysisView(game: game)
-                case 4:
-                    TeamEvolutionView(game: game)
-                default:
-                    EmptyView()
-                }
-            }
-            .padding()
+            GameDetailContent(game: game, selectedTab: $selectedTab)
         }
         .navigationTitle(game.displayName)
+        .focusedSceneValue(\.selectedTab, $selectedTab)
+    }
+}
+
+/// Shared content used by both the split-view detail pane and standalone game windows.
+struct GameDetailContent: View {
+    let game: Game
+    @Binding var selectedTab: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            GameHeaderView(game: game)
+
+            StatsCardsView(game: game)
+
+            if !game.currentTeam.isEmpty {
+                CurrentTeamView(team: game.currentTeam)
+            }
+
+            Picker("Ansicht", selection: $selectedTab) {
+                Text("Sessions").tag(0)
+                Text("Timeline").tag(1)
+                Text("Heatmap").tag(2)
+                Text("Team-Analyse").tag(3)
+                Text("Team-Entwicklung").tag(4)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+
+            switch selectedTab {
+            case 0:
+                SessionsListView(game: game)
+            case 1:
+                TimelineView(game: game)
+            case 2:
+                HeatmapView(game: game)
+            case 3:
+                TeamAnalysisView(game: game)
+            case 4:
+                TeamEvolutionView(game: game)
+            default:
+                EmptyView()
+            }
+        }
+        .padding()
     }
 }
 
