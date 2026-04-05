@@ -14,6 +14,9 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var dataLoader = DataLoader()
 
+    // Persists the selected game across app launches (per window scene)
+    @SceneStorage("selectedGameName") private var selectedGameName: String?
+
     private var vaultManager = VaultManager.shared
 
     var body: some View {
@@ -37,6 +40,16 @@ struct ContentView: View {
                 }
             }
         }
+        // Persist selection
+        .onChange(of: selectedGame) { _, game in
+            selectedGameName = game?.name
+        }
+        // Restore selection once games are loaded
+        .onChange(of: games) { _, newGames in
+            if selectedGame == nil, let name = selectedGameName {
+                selectedGame = newGames.first { $0.name == name }
+            }
+        }
     }
 
     @ViewBuilder
@@ -51,12 +64,7 @@ struct ContentView: View {
                     }
 
                     ToolbarItem(placement: .automatic) {
-                        Button(action: {
-                            selectedGame = nil
-                            Task {
-                                await dataLoader.reloadData(context: modelContext)
-                            }
-                        }) {
+                        Button(action: reload) {
                             Label("Aktualisieren", systemImage: "arrow.clockwise")
                         }
                         .disabled(dataLoader.isLoading)
@@ -76,6 +84,7 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 350)
+        .focusedSceneValue(\.reloadAction, reload)
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView()
@@ -105,6 +114,10 @@ struct ContentView: View {
                 Text(error)
             }
         }
+    }
+
+    private func reload() {
+        Task { await dataLoader.reloadData(context: modelContext) }
     }
 }
 
