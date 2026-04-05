@@ -5,11 +5,16 @@
 
 import Foundation
 import AppKit
+import OSLog
 
 @Observable
 final class VaultManager {
     static let shared = VaultManager()
 
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "io.github.fruitseller.pokejournal",
+        category: "VaultManager"
+    )
     private let bookmarkKey = "vaultBookmarkData"
     private let pokemonSubpath = "hobbies/videospiele/pokemon"
 
@@ -56,7 +61,7 @@ final class VaultManager {
             )
             UserDefaults.standard.set(bookmarkData, forKey: bookmarkKey)
         } catch {
-            print("Failed to create bookmark: \(error)")
+            logger.error("Failed to create bookmark: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -80,7 +85,7 @@ final class VaultManager {
 
             vaultURL = url
         } catch {
-            print("Failed to resolve bookmark: \(error)")
+            logger.error("Failed to resolve bookmark: \(error.localizedDescription, privacy: .public)")
             UserDefaults.standard.removeObject(forKey: bookmarkKey)
         }
     }
@@ -118,10 +123,20 @@ final class VaultManager {
         return relative
     }
 
+    static func obsidianURL(vaultName: String, filePath: String, vaultPath: String) -> URL? {
+        let relativePath = vaultRelativePath(absolutePath: filePath, vaultPath: vaultPath)
+        var components = URLComponents()
+        components.scheme = "obsidian"
+        components.host = "open"
+        components.queryItems = [
+            URLQueryItem(name: "vault", value: vaultName),
+            URLQueryItem(name: "file", value: relativePath)
+        ]
+        return components.url
+    }
+
     func obsidianURL(forFilePath filePath: String) -> URL? {
         guard let vaultName, let vaultPath = vaultURL?.path else { return nil }
-        let relativePath = Self.vaultRelativePath(absolutePath: filePath, vaultPath: vaultPath)
-        let encoded = relativePath.replacingOccurrences(of: " ", with: "%20")
-        return URL(string: "obsidian://open?vault=\(vaultName)&file=\(encoded)")
+        return Self.obsidianURL(vaultName: vaultName, filePath: filePath, vaultPath: vaultPath)
     }
 }

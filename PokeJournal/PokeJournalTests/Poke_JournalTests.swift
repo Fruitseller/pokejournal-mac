@@ -982,6 +982,20 @@ struct ObsidianPathTests {
         let result = VaultManager.vaultRelativePath(absolutePath: absolute, vaultPath: vaultPath)
         #expect(result == "hobbies/pokemon/session file.md")
     }
+
+    @Test func obsidianURL_encodesSpecialCharactersInQueryValues() {
+        let url = VaultManager.obsidianURL(
+            vaultName: "Mein Vault",
+            filePath: "/Users/testuser/Mein Vault/ordner/ä&b#c?.md",
+            vaultPath: "/Users/testuser/Mein Vault"
+        )
+
+        let components = url.map { URLComponents(url: $0, resolvingAgainstBaseURL: false) }.flatMap { $0 }
+
+        #expect(components?.queryItems?.first(where: { $0.name == "vault" })?.value == "Mein Vault")
+        #expect(components?.queryItems?.first(where: { $0.name == "file" })?.value == "ordner/ä&b#c?.md")
+        #expect(url?.absoluteString.contains("%26b%23c") == true)
+    }
 }
 
 // MARK: - DataLoader Clear & Reload Tests
