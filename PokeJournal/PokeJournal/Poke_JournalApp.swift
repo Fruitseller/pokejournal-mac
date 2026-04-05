@@ -29,17 +29,10 @@ struct Poke_JournalApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
-        .commands {
-            CommandGroup(replacing: .appSettings) {
-                Button("Einstellungen...") {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                }
-                .keyboardShortcut(",", modifiers: .command)
-            }
-        }
 
         Settings {
             SettingsView()
+                .modelContainer(sharedModelContainer)
         }
     }
 }

@@ -55,10 +55,6 @@ On errors: Read logs → fix code → rebuild. Iterate until clean build.
 ```
 On failures: Analyze output → fix tests/code → re-run.
 
-### 3. Runtime Verification
-- Launch app via Xcode (`⌘R`)
-- Check Console for SwiftUI/SwiftData warnings
-- Manually verify affected UI flows
 
 ### Success Criteria for "Done"
 - ✅ Clean build (0 errors, 0 warnings)
@@ -129,6 +125,13 @@ metacritic: 72
 - Obsidian integration uses URL scheme: `obsidian://open?vault=[vaultName]&file=[path]`
 - App uses `@Observable` for services, `@Query` for SwiftData, `@AppStorage` for preferences
 - No external dependencies - pure Apple frameworks, sandboxed
+
+## Liquid Glass Rules
+- .glassEffect() only on floating navigation controls, NEVER on content
+- Use GlassEffectContainer for grouping nearby glass elements
+- System NavigationSplitView/toolbar get glass automatically — don't double-apply
+- .glassEffect() as last modifier in chain
+- .regular.interactive() for primary actions, .clear with dimming for busy backgrounds
 
 ## Git Conventions
 

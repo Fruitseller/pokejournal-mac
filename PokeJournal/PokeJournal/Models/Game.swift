@@ -18,6 +18,7 @@ final class Game {
     var genre: String?
     var developer: String?
     var metacriticScore: Int?
+    var isHidden: Bool = false
 
     @Relationship(deleteRule: .cascade)
     var sessions: [Session] = []
@@ -52,6 +53,12 @@ final class Game {
             return latestOldSession.orderedTeam
         }
         return []
+    }
+
+    static func isRPGGenre(_ genre: String?) -> Bool {
+        guard let genre, !genre.isEmpty else { return true }
+        let lower = genre.lowercased()
+        return lower.contains("rpg") || lower.contains("rollenspiel")
     }
 
     var displayName: String {

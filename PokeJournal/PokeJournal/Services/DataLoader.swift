@@ -227,7 +227,30 @@ final class DataLoader {
     }
 
     func reloadData(context: ModelContext) async {
+        let hiddenPaths = hiddenGamePaths(context: context)
         clearAllData(context: context)
         await loadGames(into: context)
+        restoreHiddenState(hiddenPaths: hiddenPaths, context: context)
+    }
+
+    func hiddenGamePaths(context: ModelContext) -> Set<String> {
+        do {
+            let games = try context.fetch(FetchDescriptor<Game>())
+            return Set(games.filter(\.isHidden).map(\.filePath))
+        } catch {
+            return []
+        }
+    }
+
+    func restoreHiddenState(hiddenPaths: Set<String>, context: ModelContext) {
+        guard !hiddenPaths.isEmpty else { return }
+        do {
+            let games = try context.fetch(FetchDescriptor<Game>())
+            for game in games where hiddenPaths.contains(game.filePath) {
+                game.isHidden = true
+            }
+        } catch {
+            // Non-critical: hidden state lost on reload is acceptable
+        }
     }
 }

@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 enum SpriteStyle: String, CaseIterable {
     case official = "Offizielles Artwork"
@@ -20,6 +21,11 @@ struct SettingsView: View {
     @Bindable var vaultManager = VaultManager.shared
     @AppStorage("spriteStyle") private var spriteStyle: SpriteStyle = .official
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @Query(sort: \Game.name) private var games: [Game]
+
+    private var hiddenGames: [Game] {
+        games.filter(\.isHidden)
+    }
 
     var body: some View {
         Form {
@@ -75,6 +81,27 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Ausgeblendete Spiele") {
+                if hiddenGames.isEmpty {
+                    Text("Keine ausgeblendeten Spiele")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(hiddenGames) { game in
+                        HStack {
+                            Text(game.displayName)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            Spacer()
+                            Button("Einblenden") {
+                                game.isHidden = false
+                            }
+                            .accessibilityIdentifier("unhideGame_\(game.name)")
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+            }
+
             Section("Über") {
                 LabeledContent("Version") {
                     Text("1.0.0")
@@ -95,4 +122,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
+        .modelContainer(for: Game.self, inMemory: true)
 }
