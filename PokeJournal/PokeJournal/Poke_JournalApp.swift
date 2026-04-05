@@ -29,6 +29,18 @@ struct Poke_JournalApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        .commands {
+            AppCommands()
+        }
+
+        // Standalone game windows opened via context menu
+        WindowGroup("Spiel", id: "game", for: String.self) { $gameName in
+            if let name = gameName {
+                GameWindowView(gameName: name)
+                    .modelContainer(sharedModelContainer)
+            }
+        }
+        .defaultSize(width: 960, height: 720)
 
         Settings {
             SettingsView()
