@@ -21,7 +21,15 @@ Geplante Features für zukünftige Versionen.
 - Session-Detail zeigt "Entwickelt"-Badge statt "Neu"/"Entfernt"
 - [Detailplan](plans/evolution-lines.md)
 
-## v1.4 - Filter & Suche
+## v1.4 - Typ-Matchup-Rechner
+
+- **Typ-Effektivitäts-Analyse** - Zeigt Schwächen/Stärken des aktuellen Teams
+- Generationsabhängiges Type Chart (Gen 1, Gen 2–5, Gen 6+)
+- Dual-Type-Berechnung, Abdeckungs-Lücken, Empfehlungen
+- Sheet vom aktuellen Team aus erreichbar
+- [Detailplan](plans/type-matchup.md)
+
+## v1.5 - Filter & Suche
 
 - **Timeline-Filter** - Nach Zeitraum filtern, nur Sessions mit Team-Änderungen
 - **Pokémon-Suche** - Finde alle Sessions in denen ein bestimmtes Pokémon im Team war
