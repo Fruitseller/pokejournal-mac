@@ -6,19 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		AE2C35222F2EC08F006C94E1 /* PLAN.md in Resources */ = {isa = PBXBuildFile; fileRef = AE2C35212F2EC08F006C94E1 /* PLAN.md */; };
-		AEA683C72F4BA7A30041C592 /* timeline-redesign.md in Resources */ = {isa = PBXBuildFile; fileRef = AEA683C32F4BA7A30041C592 /* timeline-redesign.md */; };
-		AEA683C82F4BA7A30041C592 /* heatmap.md in Resources */ = {isa = PBXBuildFile; fileRef = AEA683C12F4BA7A30041C592 /* heatmap.md */; };
-		AEA683C92F4BA7A30041C592 /* session-detail.md in Resources */ = {isa = PBXBuildFile; fileRef = AEA683C22F4BA7A30041C592 /* session-detail.md */; };
-		AEA683CA2F4BA7A30041C592 /* team-evolution.md in Resources */ = {isa = PBXBuildFile; fileRef = AEA683C52F4BA7A30041C592 /* team-evolution.md */; };
-		AEC7C9162F300E7300F8579B /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = AEC7C9102F300E7300F8579B /* CLAUDE.md */; };
-		AEC7C9172F300E7300F8579B /* fetch_pokemon_data.py in Resources */ = {isa = PBXBuildFile; fileRef = AEC7C9142F300E7300F8579B /* fetch_pokemon_data.py */; };
-		AEC7C9182F300E7300F8579B /* download_sprites.sh in Resources */ = {isa = PBXBuildFile; fileRef = AEC7C9132F300E7300F8579B /* download_sprites.sh */; };
-		AEC7C9192F300E7300F8579B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = AEC7C9112F300E7300F8579B /* README.md */; };
-		AEC7C91A2F300E7300F8579B /* build.sh in Resources */ = {isa = PBXBuildFile; fileRef = AEC7C9122F300E7300F8579B /* build.sh */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		AE2C34F72F2EBFF7006C94E1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -41,6 +28,7 @@
 		AE2C34F62F2EBFF7006C94E1 /* PokeJournalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokeJournalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE2C35002F2EBFF7006C94E1 /* PokeJournalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokeJournalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE2C35212F2EC08F006C94E1 /* PLAN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = PLAN.md; path = ../PLAN.md; sourceTree = SOURCE_ROOT; };
+		AEA423672F82EED100DD75BE /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = AGENTS.md; path = ../AGENTS.md; sourceTree = SOURCE_ROOT; };
 		AEA683C12F4BA7A30041C592 /* heatmap.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = heatmap.md; sourceTree = "<group>"; };
 		AEA683C22F4BA7A30041C592 /* session-detail.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "session-detail.md"; sourceTree = "<group>"; };
 		AEA683C32F4BA7A30041C592 /* timeline-redesign.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "timeline-redesign.md"; sourceTree = "<group>"; };
@@ -98,6 +86,7 @@
 		AE2C34DE2F2EBFF6006C94E1 = {
 			isa = PBXGroup;
 			children = (
+				AEA423672F82EED100DD75BE /* AGENTS.md */,
 				AEA683C62F4BA7A30041C592 /* plans */,
 				AEC7C9102F300E7300F8579B /* CLAUDE.md */,
 				AEC7C9112F300E7300F8579B /* README.md */,
@@ -272,16 +261,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AE2C35222F2EC08F006C94E1 /* PLAN.md in Resources */,
-				AEC7C9162F300E7300F8579B /* CLAUDE.md in Resources */,
-				AEC7C9172F300E7300F8579B /* fetch_pokemon_data.py in Resources */,
-				AEC7C9182F300E7300F8579B /* download_sprites.sh in Resources */,
-				AEA683C72F4BA7A30041C592 /* timeline-redesign.md in Resources */,
-				AEA683C82F4BA7A30041C592 /* heatmap.md in Resources */,
-				AEA683C92F4BA7A30041C592 /* session-detail.md in Resources */,
-				AEA683CA2F4BA7A30041C592 /* team-evolution.md in Resources */,
-				AEC7C9192F300E7300F8579B /* README.md in Resources */,
-				AEC7C91A2F300E7300F8579B /* build.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
