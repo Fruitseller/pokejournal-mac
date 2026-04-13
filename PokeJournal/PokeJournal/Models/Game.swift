@@ -42,14 +42,16 @@ final class Game {
     }
 
     var lastPlayedDate: Date? {
-        allSessionDates.last
+        let latestSession = sessions.max(by: { $0.date < $1.date })?.date
+        let latestOldSession = oldSessions.max(by: { $0.date < $1.date })?.date
+        return [latestSession, latestOldSession].compactMap { $0 }.max()
     }
 
     var currentTeam: [TeamMember] {
-        if let latestSession = sessions.sorted(by: { $0.date > $1.date }).first, !latestSession.team.isEmpty {
+        if let latestSession = sessions.max(by: { $0.date < $1.date }), !latestSession.team.isEmpty {
             return latestSession.orderedTeam
         }
-        if let latestOldSession = oldSessions.sorted(by: { $0.date > $1.date }).first {
+        if let latestOldSession = oldSessions.max(by: { $0.date < $1.date }) {
             return latestOldSession.orderedTeam
         }
         return []

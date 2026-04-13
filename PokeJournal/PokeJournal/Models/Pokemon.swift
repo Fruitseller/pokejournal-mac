@@ -154,9 +154,7 @@ class PokemonDatabase {
     /// Returns a grouping key for a team member based on evolution line.
     /// Variant Pokemon (e.g. "Alola Raichu") get their own key.
     func evolutionLineKey(for pokemonName: String, variant: String?) -> String {
-        if variant != nil {
-            if let v = variant { return "\(v) \(pokemonName)" }
-        }
+        if let v = variant { return "\(v) \(pokemonName)" }
         if let pokemon = find(byName: pokemonName),
            let chainID = pokemon.evolutionChainID {
             let line = evolutionLine(for: pokemon)

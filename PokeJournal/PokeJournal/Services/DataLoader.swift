@@ -70,50 +70,52 @@ final class DataLoader {
         isLoading = false
     }
 
-    // New format: Game in subdirectory with separate session files
-    private func loadGame(from url: URL, named name: String, in folder: URL, context: ModelContext) async throws {
-        let content = try String(contentsOf: url, encoding: .utf8)
-        let metadata = parser.parseYAMLFrontmatter(from: content)
-
-        let game = Game(name: name, filePath: url.path)
+    private func createGame(name: String, filePath: String, metadata: ParsedGameMetadata, context: ModelContext) -> Game {
+        let game = Game(name: name, filePath: filePath)
         game.aliases = metadata.aliases
         game.releaseDate = metadata.releaseDate
         game.platforms = metadata.platforms
         game.genre = metadata.genre
         game.developer = metadata.developer
         game.metacriticScore = metadata.metacriticScore
-
         context.insert(game)
+        return game
+    }
 
-        // Load sessions from sessions/ subfolder
+    private func createTeamMembers(from parsed: [ParsedTeamMember], context: ModelContext) -> [TeamMember] {
+        parsed.enumerated().map { index, member in
+            let teamMember = TeamMember(
+                pokemonName: member.name,
+                level: member.level,
+                variant: member.variant
+            )
+            teamMember.order = index
+            context.insert(teamMember)
+            return teamMember
+        }
+    }
+
+    private func loadGame(from url: URL, named name: String, in folder: URL, context: ModelContext) async throws {
+        let content = try String(contentsOf: url, encoding: .utf8)
+        let metadata = parser.parseYAMLFrontmatter(from: content)
+        let game = createGame(name: name, filePath: url.path, metadata: metadata, context: context)
+
         let sessionsFolder = folder.appendingPathComponent("\(name)/sessions")
         if FileManager.default.fileExists(atPath: sessionsFolder.path) {
             try loadSessions(for: game, from: sessionsFolder, context: context)
         }
 
-        // Load old sessions from old_[gamename].md file
         let oldSessionsFile = folder.appendingPathComponent("old_\(name).md")
         if FileManager.default.fileExists(atPath: oldSessionsFile.path) {
             try loadOldSessions(for: game, from: oldSessionsFile, context: context)
         }
     }
 
-    // Old format: Game .md file directly in pokemon folder with inline sessions
     private func loadGameOldFormat(from url: URL, named name: String, in folder: URL, context: ModelContext) async throws {
         let content = try String(contentsOf: url, encoding: .utf8)
         let metadata = parser.parseYAMLFrontmatter(from: content)
+        let game = createGame(name: name, filePath: url.path, metadata: metadata, context: context)
 
-        let game = Game(name: name, filePath: url.path)
-        game.aliases = metadata.aliases
-        game.releaseDate = metadata.releaseDate
-        game.platforms = metadata.platforms
-        game.genre = metadata.genre
-        game.developer = metadata.developer
-        game.metacriticScore = metadata.metacriticScore
-
-        context.insert(game)
-
-        // Parse inline sessions from the game file itself (## YYYY-MM-DD format)
         let parsedSessions = parser.parseOldFormatSessions(from: content, sourceFile: url.path)
 
         for parsed in parsedSessions {
@@ -126,16 +128,10 @@ final class DataLoader {
             )
             oldSession.game = game
 
-            for (index, member) in parsed.team.enumerated() {
-                let teamMember = TeamMember(
-                    pokemonName: member.name,
-                    level: member.level,
-                    variant: member.variant
-                )
-                teamMember.order = index
-                teamMember.oldSession = oldSession
-                oldSession.team.append(teamMember)
-                context.insert(teamMember)
+            let members = createTeamMembers(from: parsed.team, context: context)
+            for member in members {
+                member.oldSession = oldSession
+                oldSession.team.append(member)
             }
 
             game.oldSessions.append(oldSession)
@@ -167,16 +163,10 @@ final class DataLoader {
             )
             session.game = game
 
-            for (index, member) in teamMembers.enumerated() {
-                let teamMember = TeamMember(
-                    pokemonName: member.name,
-                    level: member.level,
-                    variant: member.variant
-                )
-                teamMember.order = index
-                teamMember.session = session
-                session.team.append(teamMember)
-                context.insert(teamMember)
+            let members = createTeamMembers(from: teamMembers, context: context)
+            for member in members {
+                member.session = session
+                session.team.append(member)
             }
 
             game.sessions.append(session)
@@ -198,16 +188,10 @@ final class DataLoader {
             )
             oldSession.game = game
 
-            for (index, member) in parsed.team.enumerated() {
-                let teamMember = TeamMember(
-                    pokemonName: member.name,
-                    level: member.level,
-                    variant: member.variant
-                )
-                teamMember.order = index
-                teamMember.oldSession = oldSession
-                oldSession.team.append(teamMember)
-                context.insert(teamMember)
+            let members = createTeamMembers(from: parsed.team, context: context)
+            for member in members {
+                member.oldSession = oldSession
+                oldSession.team.append(member)
             }
 
             game.oldSessions.append(oldSession)

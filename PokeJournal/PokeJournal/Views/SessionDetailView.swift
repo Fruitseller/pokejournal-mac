@@ -345,26 +345,6 @@ struct RemovedTeamMemberCard: View {
 
 // MARK: - Shared Components
 
-struct TeamGridView: View {
-    let team: [TeamMember]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Team", systemImage: "person.3")
-                .font(.headline)
-
-            LazyVGrid(columns: [
-                GridItem(.adaptive(minimum: 100, maximum: 150), spacing: 12)
-            ], spacing: 12) {
-                ForEach(team, id: \.pokemonName) { member in
-                    TeamMemberCard(member: member)
-                }
-            }
-        }
-        .padding()
-    }
-}
-
 struct SectionView: View {
     let title: String
     let content: String
