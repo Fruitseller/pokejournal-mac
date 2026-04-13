@@ -9,53 +9,12 @@ import SwiftData
 struct TeamAnalysisView: View {
     let game: Game
 
-    private var pokemonUsage: [(name: String, count: Int, maxLevel: Int)] {
-        let db = PokemonDatabase.shared
-        // Track per evolution line: session count (deduplicated), max level, highest stage name
-        var usage: [String: (count: Int, maxLevel: Int, displayName: String, highestID: Int)] = [:]
-
-        let allSessions: [[TeamMember]] =
-            game.sessions.map(\.orderedTeam) + game.oldSessions.map(\.orderedTeam)
-
-        for team in allSessions {
-            // Per session: each evolution line counts at most once
-            var seenLines: Set<String> = []
-
-            for member in team {
-                let resolved = db.find(byName: member.pokemonName)
-                let lineKey = db.evolutionLineKey(for: member.pokemonName, variant: member.variant)
-
-                let resolvedID = resolved?.id ?? 0
-                let current = usage[lineKey]
-
-                // Update highest seen form (by pokemon ID = evolution order)
-                let bestName: String
-                let bestID: Int
-                if let current, current.highestID >= resolvedID {
-                    bestName = current.displayName
-                    bestID = current.highestID
-                } else {
-                    bestName = member.displayName
-                    bestID = resolvedID
-                }
-
-                let sessionIncrement = seenLines.insert(lineKey).inserted ? 1 : 0
-                usage[lineKey] = (
-                    count: (current?.count ?? 0) + sessionIncrement,
-                    maxLevel: max(current?.maxLevel ?? 0, member.level),
-                    displayName: bestName,
-                    highestID: bestID
-                )
-            }
-        }
-
-        return usage.map { (name: $0.value.displayName, count: $0.value.count, maxLevel: $0.value.maxLevel) }
-            .sorted { $0.count > $1.count }
+    private var pokemonUsage: [PokemonUsageEntry] {
+        TeamAnalysisDataBuilder.buildUsage(from: game)
     }
 
-    private var hallOfFame: [(name: String, count: Int)] {
+    private var hallOfFame: [PokemonUsageEntry] {
         Array(pokemonUsage.prefix(6))
-            .map { (name: $0.name, count: $0.count) }
     }
 
     var body: some View {
@@ -80,7 +39,7 @@ struct TeamAnalysisView: View {
 }
 
 struct HallOfFameSection: View {
-    let pokemon: [(name: String, count: Int)]
+    let pokemon: [PokemonUsageEntry]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -134,7 +93,7 @@ struct HallOfFameSection: View {
 }
 
 struct UsageStatsSection: View {
-    let usage: [(name: String, count: Int, maxLevel: Int)]
+    let usage: [PokemonUsageEntry]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
