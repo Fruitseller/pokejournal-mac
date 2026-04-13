@@ -87,7 +87,7 @@ On failures: Analyze output → fix tests/code → re-run.
 
 ### Views (`Views/`)
 - **ContentView** - NavigationSplitView root with sidebar/detail
-- **GameDetailView** - Tabbed interface (Sessions, Timeline, Team Analysis)
+- **GameDetailView** - Tabbed interface (Sessions, Timeline, Heatmap, Team Analysis, Team Evolution)
 - **TimelineView** - Horizontal timeline with gap detection (color-coded)
 - **TeamAnalysisView** - Usage stats and Hall of Fame
 

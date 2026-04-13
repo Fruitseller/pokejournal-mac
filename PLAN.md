@@ -7,19 +7,8 @@ Geplante Features für zukünftige Versionen.
 - **v1.1 - Session-Detailansicht** - Klickbare Sessions mit Team-Diff ([Plan](plans/done/session-detail.md))
 - **Heatmap** - GitHub-Style Aktivitäts-Kalender ([Plan](plans/done/heatmap.md))
 - **Timeline Redesign** - Proportionale Abstände, Schnitte bei Pausen ([Plan](plans/done/timeline-redesign.md))
-
-## v1.2 - Team-Entwicklung
-
-- **Level-Progression Chart** - Liniendiagramm der Level-Entwicklung pro Pokémon über alle Sessions (Swift Charts)
-- [Detailplan](plans/done/team-evolution.md)
-
-## v1.3 - Entwicklungslinien
-
-- **Entwicklungslinien als Einheit** - Glumanda/Glutexo/Glurak gelten überall als eine Einheit
-- Team-Analyse zählt die ganze Linie zusammen
-- Level-Chart führt die Linie bei Entwicklung fort
-- Session-Detail zeigt "Entwickelt"-Badge statt "Neu"/"Entfernt"
-- [Detailplan](plans/evolution-lines.md)
+- **v1.2 - Team-Entwicklung** - Level-Progression Chart mit Swift Charts ([Plan](plans/done/team-evolution.md))
+- **v1.3 - Entwicklungslinien** - Glumanda/Glutexo/Glurak als Einheit ([Plan](plans/done/evolution-lines.md))
 
 ## v1.4 - Typ-Matchup-Rechner
 

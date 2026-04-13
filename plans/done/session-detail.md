@@ -45,7 +45,7 @@ Akzeptiert `AnySession` statt `Session`. Zusätzlicher Parameter `previousTeam: 
 **Aufbau der Detailansicht:**
 
 1. **Header** - Datum, Spielname, optional "Altes Format"-Badge, optional Obsidian-Button
-2. **Team-Grid** - Sprites, Namen, Level (wie bisher `TeamGridView`)
+2. **Team-Grid** - Sprites, Namen, Level (via `TeamSectionView`)
 3. **Team-Veränderungen** (neu, nur wenn `previousTeam` vorhanden und Unterschiede existieren):
    - Neue Pokemon: grunes Badge "Neu"
    - Entfernte Pokemon: rotes Badge "Entfernt"

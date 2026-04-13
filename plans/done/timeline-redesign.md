@@ -51,8 +51,7 @@ Dez 27  29  31  Jan 3  5                                          Jun 18  20  23
 - Innerhalb eines Segments bleibt die Skalierung konsistent
 
 **Schwellenwert für Schnitte:**
-- Standard: 30 Tage
-- Kann später konfigurierbar gemacht werden
+- Implementiert: 14 Tage (`TimelineDataBuilder.gapThreshold`)
 
 ### Interaktion
 
