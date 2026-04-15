@@ -15,8 +15,8 @@ extension FocusedValues {
 // MARK: - Commands
 
 struct AppCommands: Commands {
-    @FocusedSceneValue(\.selectedTab) var selectedTabBinding: Binding<Int>?
-    @FocusedSceneValue(\.reloadAction) var reloadAction: (() -> Void)?
+    @FocusedValue(\.selectedTab) var selectedTabBinding: Binding<Int>?
+    @FocusedValue(\.reloadAction) var reloadAction: (() -> Void)?
 
     var body: some Commands {
         // Remove "New Window" from File menu — we handle it ourselves via context menu
