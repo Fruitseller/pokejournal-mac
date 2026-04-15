@@ -14,10 +14,12 @@ struct GameDetailView: View {
         ScrollView {
             GameDetailContent(game: game, selectedTab: $selectedTab)
         }
+        .scrollIndicators(.never)
         .navigationTitle(game.displayName)
         .focusedSceneValue(\.selectedTab, $selectedTab)
     }
 }
+
 
 /// Shared content used by both the split-view detail pane and standalone game windows.
 struct GameDetailContent: View {
