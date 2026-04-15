@@ -117,6 +117,7 @@ struct ContentView: View {
     }
 
     private func reload() {
+        selectedGame = nil
         Task { await dataLoader.reloadData(context: modelContext) }
     }
 }
