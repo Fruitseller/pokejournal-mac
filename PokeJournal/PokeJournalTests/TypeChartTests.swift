@@ -198,3 +198,44 @@ struct TypeChartDualTypeTests {
         #expect(m == 1.0)
     }
 }
+
+struct TypeChartTeamDefensiveProfileTests {
+
+    @Test func singleMember_fireFlying_rockIs4x() {
+        let team: [[String]] = [["fire", "flying"]]
+        let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["rock"] == 4.0)
+    }
+
+    @Test func twoMembers_takesWorst() {
+        // One member is 4x weak to rock; another is 1x. Profile reports 4x.
+        let team: [[String]] = [["fire", "flying"], ["water"]]
+        let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["rock"] == 4.0)
+    }
+
+    @Test func resistOnOne_weakOnAnother_reportsWorst() {
+        // Electric: 0x against ground, 2x against flying — profile keeps 2x (the worst).
+        let team: [[String]] = [["ground"], ["flying"]]
+        let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["electric"] == 2.0)
+    }
+
+    @Test func profileCoversAllGenerationTypes() {
+        let team: [[String]] = [["normal"]]
+        let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile.count == 18)
+    }
+
+    @Test func profileInGen1HasFifteenKeys() {
+        let team: [[String]] = [["normal"]]
+        let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen1)
+        #expect(profile.count == 15)
+    }
+
+    @Test func emptyTeam_allNeutral() {
+        let profile = TypeChart.teamDefensiveProfile(team: [], generation: .gen6plus)
+        #expect(profile["fire"] == 1.0)
+        #expect(profile["water"] == 1.0)
+    }
+}

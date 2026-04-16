@@ -136,4 +136,28 @@ enum TypeChart {
             acc * effectiveness(attacker: attacker, defender: defender, generation: generation)
         }
     }
+
+    /// Per attacking type, the worst multiplier any team member takes.
+    /// Empty team → every attacker scored as 1.0 (neutral).
+    static func teamDefensiveProfile(
+        team: [[String]],
+        generation: TypeChartGeneration
+    ) -> [String: Double] {
+        var profile: [String: Double] = [:]
+        for attacker in generation.allTypes {
+            if team.isEmpty {
+                profile[attacker] = 1.0
+                continue
+            }
+            let worst = team.map { defenderTypes in
+                defensiveMultiplier(
+                    attacker: attacker,
+                    defenderTypes: defenderTypes,
+                    generation: generation
+                )
+            }.max() ?? 1.0
+            profile[attacker] = worst
+        }
+        return profile
+    }
 }
