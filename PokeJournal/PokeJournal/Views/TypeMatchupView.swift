@@ -66,6 +66,7 @@ struct TypeMatchupView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }
+                        .accessibilityIdentifier("typMatchupDoneButton")
                 }
             }
         }

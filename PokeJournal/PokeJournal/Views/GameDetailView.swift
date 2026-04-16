@@ -211,6 +211,7 @@ struct CurrentTeamView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .accessibilityIdentifier("typMatchupButton")
             }
 
             LazyVGrid(columns: [
