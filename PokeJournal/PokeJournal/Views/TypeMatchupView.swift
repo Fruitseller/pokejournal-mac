@@ -95,7 +95,7 @@ struct TypeMatchupView: View {
                 Text("Diese Typen kann dein Team nicht super-effektiv treffen:")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                FlowLayout(spacing: 6) {
+                FlowLayout(spacing: 8) {
                     ForEach(gaps, id: \.self) { type in
                         Text(typeLabel(type))
                             .font(.caption)
@@ -123,7 +123,7 @@ struct TypeMatchupView: View {
                     HStack(spacing: 8) {
                         Circle()
                             .fill(PokemonTypeColor.color(for: type))
-                            .frame(width: 10, height: 10)
+                            .frame(width: 12, height: 12)
                         Text("Ein \(typeLabel(type))-Pokémon würde dein Team abrunden.")
                             .font(.subheadline)
                     }
@@ -184,10 +184,10 @@ private struct DefensiveCell: View {
         }
     }
 
-    private var background: Color {
-        if multiplier > 1 { return .red.opacity(0.2) }
-        if multiplier < 1 { return .green.opacity(0.2) }
-        return .gray.opacity(0.15)
+    private var background: AnyShapeStyle {
+        if multiplier > 1 { return AnyShapeStyle(Color.red.opacity(0.2)) }
+        if multiplier < 1 { return AnyShapeStyle(Color.green.opacity(0.2)) }
+        return AnyShapeStyle(.fill.quaternary)
     }
 
     private var tooltip: String {
