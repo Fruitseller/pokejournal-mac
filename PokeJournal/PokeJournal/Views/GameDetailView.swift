@@ -123,9 +123,9 @@ struct MetacriticBadge: View {
         Text("\(score)")
             .font(.title2)
             .fontWeight(.bold)
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .frame(width: 50, height: 50)
-            .background(color, in: RoundedRectangle(cornerRadius: 8))
+            .background(color.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
