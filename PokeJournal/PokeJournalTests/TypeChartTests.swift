@@ -88,17 +88,17 @@ struct TypeChartEffectivenessGen6Tests {
 
 struct TypeChartEffectivenessGen2to5Tests {
 
-    @Test func ghost_resistedByStealInGen2to5() {
+    @Test func ghost_resistedBySteelInGen2to5() {
         let m = TypeChart.effectiveness(attacker: "ghost", defender: "steel", generation: .gen2to5)
         #expect(m == 0.5)
     }
 
-    @Test func dark_resistedByStealInGen2to5() {
+    @Test func dark_resistedBySteelInGen2to5() {
         let m = TypeChart.effectiveness(attacker: "dark", defender: "steel", generation: .gen2to5)
         #expect(m == 0.5)
     }
 
-    @Test func ghost_notResistedByStealInGen6plus() {
+    @Test func ghost_notResistedBySteelInGen6plus() {
         let m = TypeChart.effectiveness(attacker: "ghost", defender: "steel", generation: .gen6plus)
         #expect(m == 1.0)
     }

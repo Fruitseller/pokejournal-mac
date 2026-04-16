@@ -91,8 +91,6 @@ enum TypeChart {
         // Steel resisted ghost and dark pre-Gen 6.
         m["ghost"]?["steel"] = 0.5
         m["dark"]?["steel"] = 0.5
-        // Dragon isn't countered by fairy in these gens; fairy entry already removed above.
-        m["dragon"]?.removeValue(forKey: "fairy")
         return m
     }()
 
