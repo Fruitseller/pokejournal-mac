@@ -85,3 +85,31 @@ struct TypeChartEffectivenessGen6Tests {
         #expect(m == 1.0)
     }
 }
+
+struct TypeChartEffectivenessGen2to5Tests {
+
+    @Test func ghost_resistedByStealInGen2to5() {
+        let m = TypeChart.effectiveness(attacker: "ghost", defender: "steel", generation: .gen2to5)
+        #expect(m == 0.5)
+    }
+
+    @Test func dark_resistedByStealInGen2to5() {
+        let m = TypeChart.effectiveness(attacker: "dark", defender: "steel", generation: .gen2to5)
+        #expect(m == 0.5)
+    }
+
+    @Test func ghost_notResistedByStealInGen6plus() {
+        let m = TypeChart.effectiveness(attacker: "ghost", defender: "steel", generation: .gen6plus)
+        #expect(m == 1.0)
+    }
+
+    @Test func fairy_unknownInGen2to5_returnsNeutral() {
+        let m = TypeChart.effectiveness(attacker: "fairy", defender: "dragon", generation: .gen2to5)
+        #expect(m == 1.0)
+    }
+
+    @Test func dragon_notImmuneFairyInGen2to5() {
+        let m = TypeChart.effectiveness(attacker: "dragon", defender: "fairy", generation: .gen2to5)
+        #expect(m == 1.0)
+    }
+}

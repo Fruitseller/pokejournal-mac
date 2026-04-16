@@ -80,13 +80,31 @@ enum TypeChart {
         return value
     }
 
+    private static let gen2to5Matrix: [String: [String: Double]] = {
+        var m = gen6Matrix
+        // Drop fairy row entirely (type doesn't exist).
+        m.removeValue(forKey: "fairy")
+        // Drop fairy entries from every remaining row.
+        for key in m.keys {
+            m[key]?.removeValue(forKey: "fairy")
+        }
+        // Steel resisted ghost and dark pre-Gen 6.
+        m["ghost"]?["steel"] = 0.5
+        m["dark"]?["steel"] = 0.5
+        // Dragon isn't countered by fairy in these gens; fairy entry already removed above.
+        m["dragon"]?.removeValue(forKey: "fairy")
+        return m
+    }()
+
     private static func matrixFor(_ generation: TypeChartGeneration) -> [String: [String: Double]] {
         switch generation {
         case .gen6plus:
             return gen6Matrix
-        case .gen2to5, .gen1:
-            // Filled in by Tasks 3 and 4.
-            return gen6Matrix
+        case .gen2to5:
+            return gen2to5Matrix
+        case .gen1:
+            // Filled in by Task 4.
+            return gen2to5Matrix
         }
     }
 }
