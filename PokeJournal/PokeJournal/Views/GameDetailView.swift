@@ -33,7 +33,7 @@ struct GameDetailContent: View {
             StatsCardsView(game: game)
 
             if !game.currentTeam.isEmpty {
-                CurrentTeamView(team: game.currentTeam)
+                CurrentTeamView(game: game)
             }
 
             Picker("Ansicht", selection: $selectedTab) {
@@ -195,22 +195,36 @@ struct StatCard: View {
 }
 
 struct CurrentTeamView: View {
-    let team: [TeamMember]
+    let game: Game
+    @State private var showMatchup = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Aktuelles Team")
-                .font(.headline)
+            HStack {
+                Text("Aktuelles Team")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    showMatchup = true
+                } label: {
+                    Label("Typ-Matchup", systemImage: "shield.lefthalf.filled")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
 
             LazyVGrid(columns: [
                 GridItem(.adaptive(minimum: 100, maximum: 150), spacing: 12)
             ], spacing: 12) {
-                ForEach(team, id: \.pokemonName) { member in
+                ForEach(game.currentTeam, id: \.pokemonName) { member in
                     TeamMemberCard(member: member)
                 }
             }
         }
         .padding()
+        .sheet(isPresented: $showMatchup) {
+            TypeMatchupView(game: game)
+        }
     }
 }
 
