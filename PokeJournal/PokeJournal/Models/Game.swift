@@ -66,4 +66,16 @@ final class Game {
     var displayName: String {
         aliases.first ?? name.capitalized
     }
+
+    var generation: TypeChartGeneration {
+        guard let releaseDate,
+              let year = Int(releaseDate.prefix(4)) else {
+            return .gen6plus
+        }
+        switch year {
+        case ..<2000: return .gen1
+        case 2000..<2013: return .gen2to5
+        default: return .gen6plus
+        }
+    }
 }
