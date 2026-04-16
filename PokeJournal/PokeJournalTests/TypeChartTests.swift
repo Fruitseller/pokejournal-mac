@@ -113,3 +113,36 @@ struct TypeChartEffectivenessGen2to5Tests {
         #expect(m == 1.0)
     }
 }
+
+struct TypeChartEffectivenessGen1Tests {
+
+    @Test func ghost_zeroAgainstPsychic_gen1Bug() {
+        let m = TypeChart.effectiveness(attacker: "ghost", defender: "psychic", generation: .gen1)
+        #expect(m == 0.0)
+    }
+
+    @Test func ghost_superEffectiveAgainstPsychic_gen2to5() {
+        let m = TypeChart.effectiveness(attacker: "ghost", defender: "psychic", generation: .gen2to5)
+        #expect(m == 2.0)
+    }
+
+    @Test func poison_superEffectiveAgainstBug_gen1() {
+        let m = TypeChart.effectiveness(attacker: "poison", defender: "bug", generation: .gen1)
+        #expect(m == 2.0)
+    }
+
+    @Test func bug_superEffectiveAgainstPoison_gen1() {
+        let m = TypeChart.effectiveness(attacker: "bug", defender: "poison", generation: .gen1)
+        #expect(m == 2.0)
+    }
+
+    @Test func poison_notSuperEffectiveAgainstBug_gen2to5() {
+        let m = TypeChart.effectiveness(attacker: "poison", defender: "bug", generation: .gen2to5)
+        #expect(m == 1.0)
+    }
+
+    @Test func dark_unknownInGen1_returnsNeutral() {
+        let m = TypeChart.effectiveness(attacker: "dark", defender: "psychic", generation: .gen1)
+        #expect(m == 1.0)
+    }
+}

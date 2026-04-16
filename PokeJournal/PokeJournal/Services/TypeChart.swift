@@ -96,6 +96,23 @@ enum TypeChart {
         return m
     }()
 
+    private static let gen1Matrix: [String: [String: Double]] = {
+        var m = gen2to5Matrix
+        // Remove dark and steel rows — these types do not exist in Gen 1.
+        m.removeValue(forKey: "dark")
+        m.removeValue(forKey: "steel")
+        // Remove dark and steel entries from every remaining row.
+        for key in m.keys {
+            m[key]?.removeValue(forKey: "dark")
+            m[key]?.removeValue(forKey: "steel")
+        }
+        // Historical Gen 1 quirks:
+        m["ghost"]?["psychic"] = 0.0     // The famous Gen 1 bug.
+        m["poison"]?["bug"] = 2.0        // Was nerfed later.
+        m["bug"]?["poison"] = 2.0        // Was nerfed later.
+        return m
+    }()
+
     private static func matrixFor(_ generation: TypeChartGeneration) -> [String: [String: Double]] {
         switch generation {
         case .gen6plus:
@@ -103,8 +120,7 @@ enum TypeChart {
         case .gen2to5:
             return gen2to5Matrix
         case .gen1:
-            // Filled in by Task 4.
-            return gen2to5Matrix
+            return gen1Matrix
         }
     }
 }
