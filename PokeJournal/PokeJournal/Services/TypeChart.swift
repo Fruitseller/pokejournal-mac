@@ -180,4 +180,35 @@ enum TypeChart {
         }
         return gaps
     }
+
+    /// Up to 3 candidate types that would most improve the team's defensive profile
+    /// and offensive coverage.
+    static func recommendation(
+        team: [[String]],
+        generation: TypeChartGeneration
+    ) -> [String] {
+        let profile = teamDefensiveProfile(team: team, generation: generation)
+        let gaps = coverageGaps(team: team, generation: generation)
+        let weaknesses = profile.filter { $0.value >= 2.0 }.map { $0.key }
+
+        guard !weaknesses.isEmpty || !gaps.isEmpty else {
+            return []
+        }
+
+        let scored: [(type: String, score: Int)] = generation.allTypes.map { candidate in
+            let defensiveValue = weaknesses.filter { attacker in
+                effectiveness(attacker: attacker, defender: candidate, generation: generation) < 1.0
+            }.count
+            let offensiveValue = gaps.filter { defender in
+                effectiveness(attacker: candidate, defender: defender, generation: generation) > 1.0
+            }.count
+            return (candidate, defensiveValue + offensiveValue)
+        }
+
+        return scored
+            .filter { $0.score > 0 }
+            .sorted { $0.score > $1.score }
+            .prefix(3)
+            .map { $0.type }
+    }
 }

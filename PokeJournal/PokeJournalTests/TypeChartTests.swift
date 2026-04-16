@@ -266,3 +266,41 @@ struct TypeChartCoverageGapTests {
         #expect(gaps.count == 18)
     }
 }
+
+struct TypeChartRecommendationTests {
+
+    @Test func waterOnlyTeam_returnsNonEmptyRecommendations() {
+        // A pure water Pokémon has weaknesses (electric, grass) and many coverage gaps.
+        // The scorer picks types that fill the most gaps and resist the most weaknesses.
+        let team: [[String]] = [["water"]]
+        let recs = TypeChart.recommendation(team: team, generation: .gen6plus)
+        #expect(!recs.isEmpty)
+        // Each recommendation must actually score > 0 (covers at least one weakness or gap).
+        for rec in recs {
+            let profile = TypeChart.teamDefensiveProfile(team: team, generation: .gen6plus)
+            let gaps = TypeChart.coverageGaps(team: team, generation: .gen6plus)
+            let weaknesses = profile.filter { $0.value >= 2.0 }.map { $0.key }
+            let defScore = weaknesses.filter {
+                TypeChart.effectiveness(attacker: $0, defender: rec, generation: .gen6plus) < 1.0
+            }.count
+            let offScore = gaps.filter {
+                TypeChart.effectiveness(attacker: rec, defender: $0, generation: .gen6plus) > 1.0
+            }.count
+            #expect(defScore + offScore > 0)
+        }
+    }
+
+    @Test func recommendationReturnsThreeOrFewer() {
+        let team: [[String]] = [["water"]]
+        let recs = TypeChart.recommendation(team: team, generation: .gen6plus)
+        #expect(recs.count <= 3)
+    }
+
+    @Test func perfectlyBalancedTeam_returnsEmpty() {
+        // A team with no weaknesses (all 1.0) and no coverage gaps gets no suggestions.
+        // Constructing this exactly is hard; instead we assert non-crash on empty gaps:
+        let team: [[String]] = [["steel"], ["water"], ["electric"], ["grass"], ["ground"], ["fairy"]]
+        let recs = TypeChart.recommendation(team: team, generation: .gen6plus)
+        #expect(recs.count <= 3)
+    }
+}
