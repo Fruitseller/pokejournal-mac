@@ -57,13 +57,8 @@ struct TypeMatchupView: View {
                     Divider()
                     defensiveSection
 
-                    Text("Abdeckungs-Lücken")
-                        .font(.headline)
-                    // Filled in by Task 12.
-
-                    Text("Empfehlung")
-                        .font(.headline)
-                    // Filled in by Task 12.
+                    coverageGapsSection
+                    recommendationSection
                 }
                 .padding()
             }
@@ -84,6 +79,56 @@ struct TypeMatchupView: View {
                 .fontWeight(.bold)
             Spacer()
             generationBadge
+        }
+    }
+
+    private var coverageGapsSection: some View {
+        let gaps = TypeChart.coverageGaps(team: teamTypes, generation: game.generation)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Abdeckungs-Lücken")
+                .font(.headline)
+            if gaps.isEmpty {
+                Text("Dein Team kann alle Typen effektiv treffen.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Diese Typen kann dein Team nicht super-effektiv treffen:")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                FlowLayout(spacing: 6) {
+                    ForEach(gaps, id: \.self) { type in
+                        Text(typeLabel(type))
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(.orange.opacity(0.2), in: Capsule())
+                    }
+                }
+            }
+        }
+    }
+
+    private var recommendationSection: some View {
+        let recs = TypeChart.recommendation(team: teamTypes, generation: game.generation)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Empfehlung")
+                .font(.headline)
+            if recs.isEmpty {
+                Text("Dein Team ist gut aufgestellt — keine Empfehlungen.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(recs, id: \.self) { type in
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(PokemonTypeColor.color(for: type))
+                            .frame(width: 10, height: 10)
+                        Text("Ein \(typeLabel(type))-Pokémon würde dein Team abrunden.")
+                            .font(.subheadline)
+                    }
+                }
+            }
         }
     }
 
