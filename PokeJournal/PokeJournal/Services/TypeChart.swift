@@ -160,4 +160,24 @@ enum TypeChart {
         }
         return profile
     }
+
+    /// Defender types that no team member can hit for > 1x using any of its own types.
+    /// Returns the gap types in the generation's canonical order.
+    static func coverageGaps(
+        team: [[String]],
+        generation: TypeChartGeneration
+    ) -> [String] {
+        var gaps: [String] = []
+        for defender in generation.allTypes {
+            let anyHit = team.contains { types in
+                types.contains { attacker in
+                    effectiveness(attacker: attacker, defender: defender, generation: generation) > 1.0
+                }
+            }
+            if !anyHit {
+                gaps.append(defender)
+            }
+        }
+        return gaps
+    }
 }

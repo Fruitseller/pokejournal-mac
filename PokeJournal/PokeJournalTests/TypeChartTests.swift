@@ -239,3 +239,30 @@ struct TypeChartTeamDefensiveProfileTests {
         #expect(profile["water"] == 1.0)
     }
 }
+
+struct TypeChartCoverageGapTests {
+
+    @Test func waterOnly_cannotHitGrassSuperEffectively() {
+        let team: [[String]] = [["water"]]
+        let gaps = TypeChart.coverageGaps(team: team, generation: .gen6plus)
+        #expect(gaps.contains("grass"))
+        #expect(gaps.contains("dragon"))
+        #expect(!gaps.contains("fire"))
+        #expect(!gaps.contains("ground"))
+        #expect(!gaps.contains("rock"))
+    }
+
+    @Test func noGapsWhenAnyMemberCovers() {
+        let team: [[String]] = [["water"], ["grass"], ["electric"]]
+        let gaps = TypeChart.coverageGaps(team: team, generation: .gen6plus)
+        #expect(!gaps.contains("fire"))   // water covers
+        #expect(!gaps.contains("ground")) // water covers
+        #expect(!gaps.contains("water"))  // grass+electric cover
+        #expect(!gaps.contains("flying")) // electric covers
+    }
+
+    @Test func emptyTeam_allTypesGap() {
+        let gaps = TypeChart.coverageGaps(team: [], generation: .gen6plus)
+        #expect(gaps.count == 18)
+    }
+}
