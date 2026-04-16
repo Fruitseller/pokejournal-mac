@@ -146,3 +146,55 @@ struct TypeChartEffectivenessGen1Tests {
         #expect(m == 1.0)
     }
 }
+
+struct TypeChartDualTypeTests {
+
+    @Test func fireFlying_vsRock_4x() {
+        // rock is 2x against fire AND 2x against flying → 4x.
+        let m = TypeChart.defensiveMultiplier(
+            attacker: "rock",
+            defenderTypes: ["fire", "flying"],
+            generation: .gen6plus
+        )
+        #expect(m == 4.0)
+    }
+
+    @Test func groundFlying_vsElectric_1x() {
+        // electric is 0x against ground (immunity) and 2x against flying → 0x wins.
+        let m = TypeChart.defensiveMultiplier(
+            attacker: "electric",
+            defenderTypes: ["ground", "flying"],
+            generation: .gen6plus
+        )
+        #expect(m == 0.0)
+    }
+
+    @Test func waterGrass_vsFire_05x() {
+        // fire is 0.5x against water and 2x against grass → 1x net.
+        let m = TypeChart.defensiveMultiplier(
+            attacker: "fire",
+            defenderTypes: ["water", "grass"],
+            generation: .gen6plus
+        )
+        #expect(m == 1.0)
+    }
+
+    @Test func waterWater_vsGrass_2x() {
+        // Single type passed as one-element array.
+        let m = TypeChart.defensiveMultiplier(
+            attacker: "grass",
+            defenderTypes: ["water"],
+            generation: .gen6plus
+        )
+        #expect(m == 2.0)
+    }
+
+    @Test func emptyTypes_returnsNeutral() {
+        let m = TypeChart.defensiveMultiplier(
+            attacker: "fire",
+            defenderTypes: [],
+            generation: .gen6plus
+        )
+        #expect(m == 1.0)
+    }
+}

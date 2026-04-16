@@ -123,4 +123,17 @@ enum TypeChart {
             return gen1Matrix
         }
     }
+
+    /// Multiplier an attacker type does against a defender with one or two types.
+    /// For dual types, returns the product of each single-type multiplier.
+    static func defensiveMultiplier(
+        attacker: String,
+        defenderTypes: [String],
+        generation: TypeChartGeneration
+    ) -> Double {
+        guard !defenderTypes.isEmpty else { return 1.0 }
+        return defenderTypes.reduce(1.0) { acc, defender in
+            acc * effectiveness(attacker: attacker, defender: defender, generation: generation)
+        }
+    }
 }
