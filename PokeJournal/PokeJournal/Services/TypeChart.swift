@@ -193,7 +193,9 @@ enum TypeChart {
             return []
         }
 
-        let scored: [(type: String, score: Int)] = generation.allTypes.map { candidate in
+        let teamTypes = Set(team.flatMap { $0 })
+        let candidates = generation.allTypes.filter { !teamTypes.contains($0) }
+        let scored: [(type: String, score: Int)] = candidates.map { candidate in
             let defensiveValue = weaknesses.filter { attacker in
                 effectiveness(attacker: attacker, defender: candidate, generation: generation) < 1.0
             }.count

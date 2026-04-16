@@ -296,6 +296,23 @@ struct TypeChartRecommendationTests {
         #expect(recs.count <= 3)
     }
 
+    @Test func recommendation_excludesTypesAlreadyOnTeam() {
+        // Steel+Water: electric hits water (2x) but steel resists it (0.5x).
+        // Without exclusion, steel would score defensively — yet it's already on the team.
+        let team: [[String]] = [["steel"], ["water"]]
+        let recs = TypeChart.recommendation(team: team, generation: .gen6plus)
+        #expect(!recs.contains("steel"))
+        #expect(!recs.contains("water"))
+    }
+
+    @Test func recommendation_excludesDualTypesAlreadyOnTeam() {
+        let team: [[String]] = [["fire", "flying"], ["ground"]]
+        let recs = TypeChart.recommendation(team: team, generation: .gen6plus)
+        #expect(!recs.contains("fire"))
+        #expect(!recs.contains("flying"))
+        #expect(!recs.contains("ground"))
+    }
+
     @Test func perfectlyBalancedTeam_returnsEmpty() {
         // A team with no weaknesses (all 1.0) and no coverage gaps gets no suggestions.
         // Constructing this exactly is hard; instead we assert non-crash on empty gaps:
