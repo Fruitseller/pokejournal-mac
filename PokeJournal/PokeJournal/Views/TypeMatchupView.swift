@@ -9,6 +9,40 @@ struct TypeMatchupView: View {
     let game: Game
     @Environment(\.dismiss) private var dismiss
 
+    private var profile: [String: Double] {
+        TypeChart.teamDefensiveProfile(team: teamTypes, generation: game.generation)
+    }
+
+    private var defensiveSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Defensiv-Übersicht")
+                .font(.headline)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+                ForEach(game.generation.allTypes, id: \.self) { type in
+                    DefensiveCell(
+                        type: type,
+                        multiplier: profile[type] ?? 1.0,
+                        affectedMembers: affectedMembers(for: type)
+                    )
+                }
+            }
+        }
+    }
+
+    private func affectedMembers(for attacker: String) -> [String] {
+        game.currentTeam.compactMap { member in
+            guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
+                return nil
+            }
+            let m = TypeChart.defensiveMultiplier(
+                attacker: attacker,
+                defenderTypes: types,
+                generation: game.generation
+            )
+            return m > 1.0 ? member.displayName : nil
+        }
+    }
+
     private var teamTypes: [[String]] {
         game.currentTeam.compactMap { member in
             PokemonDatabase.shared.find(byName: member.pokemonName)?.types
@@ -21,9 +55,7 @@ struct TypeMatchupView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     header
                     Divider()
-                    Text("Defensiv-Übersicht")
-                        .font(.headline)
-                    // Filled in by Task 11.
+                    defensiveSection
 
                     Text("Abdeckungs-Lücken")
                         .font(.headline)
@@ -70,5 +102,77 @@ struct TypeMatchupView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.fill.quaternary, in: Capsule())
+    }
+}
+
+private struct DefensiveCell: View {
+    let type: String
+    let multiplier: Double
+    let affectedMembers: [String]
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(typeLabel(type))
+                .font(.caption)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(multiplierLabel)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(background, in: RoundedRectangle(cornerRadius: 8))
+        .help(tooltip)
+    }
+
+    private var multiplierLabel: String {
+        switch multiplier {
+        case 0: return "0×"
+        case 0.25: return "¼×"
+        case 0.5: return "½×"
+        case 1: return "1×"
+        case 2: return "2×"
+        case 4: return "4×"
+        default: return String(format: "%.2f×", multiplier)
+        }
+    }
+
+    private var background: Color {
+        if multiplier > 1 { return .red.opacity(0.2) }
+        if multiplier < 1 { return .green.opacity(0.2) }
+        return .gray.opacity(0.15)
+    }
+
+    private var tooltip: String {
+        if affectedMembers.isEmpty {
+            return typeLabel(type)
+        }
+        return "\(typeLabel(type)): \(affectedMembers.joined(separator: ", "))"
+    }
+}
+
+private func typeLabel(_ type: String) -> String {
+    switch type {
+    case "normal": return "Normal"
+    case "fire": return "Feuer"
+    case "water": return "Wasser"
+    case "electric": return "Elektro"
+    case "grass": return "Pflanze"
+    case "ice": return "Eis"
+    case "fighting": return "Kampf"
+    case "poison": return "Gift"
+    case "ground": return "Boden"
+    case "flying": return "Flug"
+    case "psychic": return "Psycho"
+    case "bug": return "Käfer"
+    case "rock": return "Gestein"
+    case "ghost": return "Geist"
+    case "dragon": return "Drache"
+    case "dark": return "Unlicht"
+    case "steel": return "Stahl"
+    case "fairy": return "Fee"
+    default: return type.capitalized
     }
 }
