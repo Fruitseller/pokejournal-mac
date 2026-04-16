@@ -9,8 +9,12 @@ struct TypeMatchupView: View {
     let game: Game
     @Environment(\.dismiss) private var dismiss
 
-    private var profile: [String: Double] {
+    private var defensiveProfile: [String: Double] {
         TypeChart.teamDefensiveProfile(team: teamTypes, generation: game.generation)
+    }
+
+    private var offensiveProfile: [String: Double] {
+        TypeChart.teamOffensiveProfile(team: teamTypes, generation: game.generation)
     }
 
     private var defensiveSection: some View {
@@ -19,17 +23,35 @@ struct TypeMatchupView: View {
                 .font(.headline)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
                 ForEach(game.generation.allTypes, id: \.self) { type in
-                    DefensiveCell(
+                    MatchupCell(
                         type: type,
-                        multiplier: profile[type] ?? 1.0,
-                        affectedMembers: affectedMembers(for: type)
+                        multiplier: defensiveProfile[type] ?? 1.0,
+                        highIsGood: false,
+                        relatedMembers: weakMembers(against: type)
                     )
                 }
             }
         }
     }
 
-    private func affectedMembers(for attacker: String) -> [String] {
+    private var offensiveSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Offensiv-Übersicht")
+                .font(.headline)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+                ForEach(game.generation.allTypes, id: \.self) { type in
+                    MatchupCell(
+                        type: type,
+                        multiplier: offensiveProfile[type] ?? 1.0,
+                        highIsGood: true,
+                        relatedMembers: strongMembers(against: type)
+                    )
+                }
+            }
+        }
+    }
+
+    private func weakMembers(against attacker: String) -> [String] {
         game.currentTeam.compactMap { member in
             guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
                 return nil
@@ -40,6 +62,18 @@ struct TypeMatchupView: View {
                 generation: game.generation
             )
             return m > 1.0 ? member.displayName : nil
+        }
+    }
+
+    private func strongMembers(against defender: String) -> [String] {
+        game.currentTeam.compactMap { member in
+            guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
+                return nil
+            }
+            let best = types.map {
+                TypeChart.effectiveness(attacker: $0, defender: defender, generation: game.generation)
+            }.max() ?? 1.0
+            return best > 1.0 ? member.displayName : nil
         }
     }
 
@@ -56,6 +90,7 @@ struct TypeMatchupView: View {
                     header
                     Divider()
                     defensiveSection
+                    offensiveSection
 
                     coverageGapsSection
                     recommendationSection
@@ -151,10 +186,12 @@ struct TypeMatchupView: View {
     }
 }
 
-private struct DefensiveCell: View {
+private struct MatchupCell: View {
     let type: String
     let multiplier: Double
-    let affectedMembers: [String]
+    /// When true, higher multipliers are colored green (good); when false, higher is red (bad).
+    let highIsGood: Bool
+    let relatedMembers: [String]
 
     var body: some View {
         VStack(spacing: 4) {
@@ -186,16 +223,16 @@ private struct DefensiveCell: View {
     }
 
     private var background: AnyShapeStyle {
-        if multiplier > 1 { return AnyShapeStyle(Color.red.opacity(0.2)) }
-        if multiplier < 1 { return AnyShapeStyle(Color.green.opacity(0.2)) }
-        return AnyShapeStyle(.fill.quaternary)
+        if multiplier == 1 { return AnyShapeStyle(.fill.quaternary) }
+        let isGood = (multiplier > 1) == highIsGood
+        return AnyShapeStyle(isGood ? Color.green.opacity(0.2) : Color.red.opacity(0.2))
     }
 
     private var tooltip: String {
-        if affectedMembers.isEmpty {
+        if relatedMembers.isEmpty {
             return typeLabel(type)
         }
-        return "\(typeLabel(type)): \(affectedMembers.joined(separator: ", "))"
+        return "\(typeLabel(type)): \(relatedMembers.joined(separator: ", "))"
     }
 }
 

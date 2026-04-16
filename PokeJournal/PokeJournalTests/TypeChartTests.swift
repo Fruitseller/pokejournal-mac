@@ -240,6 +240,53 @@ struct TypeChartTeamDefensiveProfileTests {
     }
 }
 
+struct TypeChartTeamOffensiveProfileTests {
+
+    @Test func waterAttacker_superEffectiveAgainstFire() {
+        let team: [[String]] = [["water"]]
+        let profile = TypeChart.teamOffensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["fire"] == 2.0)
+    }
+
+    @Test func waterAttacker_notVeryEffectiveAgainstGrass() {
+        // Water is 0.5x against grass; nothing else available.
+        let team: [[String]] = [["water"]]
+        let profile = TypeChart.teamOffensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["grass"] == 0.5)
+    }
+
+    @Test func mixedTeam_takesBestAttacker() {
+        // Water is 0.5x vs grass, grass is 0.5x vs fire. Best vs fire is water (2x);
+        // best vs grass is grass... wait grass→grass=0.5. So best vs grass = fire (2x).
+        let team: [[String]] = [["water"], ["fire"]]
+        let profile = TypeChart.teamOffensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["grass"] == 2.0)  // fire hits grass super-effectively
+        #expect(profile["fire"] == 2.0)   // water hits fire super-effectively
+        #expect(profile["water"] == 0.5)  // grass not on team; best is fire→water=0.5
+    }
+
+    @Test func dualTypeAttacker_usesBestOfOwnTypes() {
+        // Fire/flying vs rock: fire=0.5, flying=0.5 → best = 0.5.
+        // Fire/flying vs grass: fire=2, flying=2 → best = 2.
+        let team: [[String]] = [["fire", "flying"]]
+        let profile = TypeChart.teamOffensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile["rock"] == 0.5)
+        #expect(profile["grass"] == 2.0)
+    }
+
+    @Test func profileCoversAllGenerationTypes() {
+        let team: [[String]] = [["normal"]]
+        let profile = TypeChart.teamOffensiveProfile(team: team, generation: .gen6plus)
+        #expect(profile.count == 18)
+    }
+
+    @Test func emptyTeam_allNeutral() {
+        let profile = TypeChart.teamOffensiveProfile(team: [], generation: .gen6plus)
+        #expect(profile["fire"] == 1.0)
+        #expect(profile["steel"] == 1.0)
+    }
+}
+
 struct TypeChartCoverageGapTests {
 
     @Test func waterOnly_cannotHitGrassSuperEffectively() {

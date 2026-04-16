@@ -159,6 +159,26 @@ enum TypeChart {
         return profile
     }
 
+    /// Per defender type, the best multiplier any team member can deal using its own types.
+    /// Empty team → every defender scored as 1.0 (neutral).
+    static func teamOffensiveProfile(
+        team: [[String]],
+        generation: TypeChartGeneration
+    ) -> [String: Double] {
+        var profile: [String: Double] = [:]
+        for defender in generation.allTypes {
+            if team.isEmpty {
+                profile[defender] = 1.0
+                continue
+            }
+            let best = team.flatMap { $0 }.map { attacker in
+                effectiveness(attacker: attacker, defender: defender, generation: generation)
+            }.max() ?? 1.0
+            profile[defender] = best
+        }
+        return profile
+    }
+
     /// Defender types that no team member can hit for > 1x using any of its own types.
     /// Returns the gap types in the generation's canonical order.
     static func coverageGaps(
