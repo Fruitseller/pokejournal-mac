@@ -81,6 +81,16 @@ struct EvolutionLineLookupTests {
         let key = db.evolutionLineKey(for: "Raichu", variant: "Alola")
         #expect(key == "Alola Raichu")
     }
+
+    @Test func resolvedTypes_variantOverrideUsesRegionalForm() {
+        let types = db.resolvedTypes(for: "Raichu", variant: "Alola")
+        #expect(types == ["electric", "psychic"])
+    }
+
+    @Test func resolvedTypes_variantOverrideSupportsAlohaAlias() {
+        let types = db.resolvedTypes(for: "Raichu", variant: "Aloha")
+        #expect(types == ["electric", "psychic"])
+    }
 }
 
 // MARK: - TeamDiff Evolution Detection Tests

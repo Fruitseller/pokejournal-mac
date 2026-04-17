@@ -32,6 +32,64 @@ struct Pokemon: Codable, Identifiable, Hashable {
 class PokemonDatabase {
     static let shared = PokemonDatabase()
 
+    private static let regionalFormTypeOverrides: [String: [String]] = [
+        "alola:raichu": ["electric", "psychic"],
+        "alola:rattata": ["dark", "normal"],
+        "alola:raticate": ["dark", "normal"],
+        "alola:sandshrew": ["ice", "steel"],
+        "alola:sandslash": ["ice", "steel"],
+        "alola:vulpix": ["ice"],
+        "alola:ninetales": ["ice", "fairy"],
+        "alola:diglett": ["ground", "steel"],
+        "alola:dugtrio": ["ground", "steel"],
+        "alola:meowth": ["dark"],
+        "alola:persian": ["dark"],
+        "alola:geodude": ["rock", "electric"],
+        "alola:graveler": ["rock", "electric"],
+        "alola:golem": ["rock", "electric"],
+        "alola:grimer": ["poison", "dark"],
+        "alola:muk": ["poison", "dark"],
+        "alola:exeggutor": ["grass", "dragon"],
+        "alola:marowak": ["fire", "ghost"],
+        "galar:meowth": ["steel"],
+        "galar:ponyta": ["psychic"],
+        "galar:rapidash": ["psychic", "fairy"],
+        "galar:slowpoke": ["psychic"],
+        "galar:slowbro": ["poison", "psychic"],
+        "galar:farfetchd": ["fighting"],
+        "galar:weezing": ["poison", "fairy"],
+        "galar:mr. mime": ["ice", "psychic"],
+        "galar:articuno": ["psychic", "flying"],
+        "galar:zapdos": ["fighting", "flying"],
+        "galar:moltres": ["dark", "flying"],
+        "galar:slowking": ["poison", "psychic"],
+        "galar:corsola": ["ghost"],
+        "galar:zigzagoon": ["dark", "normal"],
+        "galar:linoone": ["dark", "normal"],
+        "galar:darumaka": ["ice"],
+        "galar:darmanitan": ["ice"],
+        "galar:yamask": ["ground", "ghost"],
+        "galar:stunfisk": ["ground", "steel"],
+        "hisui:growlithe": ["fire", "rock"],
+        "hisui:arcanine": ["fire", "rock"],
+        "hisui:voltorb": ["electric", "grass"],
+        "hisui:electrode": ["electric", "grass"],
+        "hisui:typhlosion": ["fire", "ghost"],
+        "hisui:qwilfish": ["dark", "poison"],
+        "hisui:sneasel": ["fighting", "poison"],
+        "hisui:samurott": ["water", "dark"],
+        "hisui:lilligant": ["grass", "fighting"],
+        "hisui:zorua": ["normal", "ghost"],
+        "hisui:zoroark": ["normal", "ghost"],
+        "hisui:braviary": ["psychic", "flying"],
+        "hisui:sliggoo": ["steel", "dragon"],
+        "hisui:goodra": ["steel", "dragon"],
+        "hisui:avalugg": ["ice", "rock"],
+        "hisui:decidueye": ["grass", "fighting"],
+        "paldea:wooper": ["poison", "ground"],
+        "paldea:tauros": ["fighting"]
+    ]
+
     private var pokemon: [Pokemon] = []
     private var nameLookup: [String: Pokemon] = [:]
     private var chainLookup: [Int: [Pokemon]] = [:]
@@ -75,6 +133,21 @@ class PokemonDatabase {
         }
 
         return fuzzyMatch(name: normalizedName)
+    }
+
+    func resolvedTypes(for pokemonName: String, variant: String?) -> [String]? {
+        guard let pokemon = find(byName: pokemonName) else {
+            return nil
+        }
+
+        guard let overrideKey = Self.regionalFormOverrideKey(
+            englishName: pokemon.nameEN,
+            variant: variant
+        ) else {
+            return pokemon.types
+        }
+
+        return Self.regionalFormTypeOverrides[overrideKey] ?? pokemon.types
     }
 
     func fuzzyMatch(name: String) -> Pokemon? {
@@ -156,7 +229,7 @@ class PokemonDatabase {
     func evolutionLineKey(for pokemonName: String, variant: String?) -> String {
         if let v = variant { return "\(v) \(pokemonName)" }
         if let pokemon = find(byName: pokemonName),
-           let chainID = pokemon.evolutionChainID {
+           pokemon.evolutionChainID != nil {
             let line = evolutionLine(for: pokemon)
             if let baseName = line.first?.nameDE { return baseName }
         }
@@ -169,5 +242,29 @@ class PokemonDatabase {
 
     func pokemon(byId id: Int) -> Pokemon? {
         pokemon.first { $0.id == id }
+    }
+
+    private static func regionalFormOverrideKey(englishName: String, variant: String?) -> String? {
+        guard let normalizedVariant = normalizedVariant(variant) else {
+            return nil
+        }
+        return "\(normalizedVariant):\(englishName.lowercased())"
+    }
+
+    private static func normalizedVariant(_ variant: String?) -> String? {
+        guard let variant else { return nil }
+
+        switch variant.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) {
+        case "alola", "alolan", "aloha":
+            return "alola"
+        case "galar", "galarian":
+            return "galar"
+        case "hisui", "hisuian":
+            return "hisui"
+        case "paldea", "paldean":
+            return "paldea"
+        default:
+            return nil
+        }
     }
 }
