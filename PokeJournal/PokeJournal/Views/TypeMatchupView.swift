@@ -5,6 +5,12 @@
 
 import SwiftUI
 
+private struct RelatedTeamMember: Identifiable {
+    let id: String
+    let displayName: String
+    let pokemonName: String
+}
+
 struct TypeMatchupView: View {
     let game: Game
     @Environment(\.dismiss) private var dismiss
@@ -37,7 +43,7 @@ struct TypeMatchupView: View {
         }
         .frame(minWidth: 520)
         .onAppear(perform: recomputeAnalyses)
-        .onChange(of: game.currentTeam.map(\.pokemonName)) { _, _ in
+        .onChange(of: currentTeamSignature) { _, _ in
             recomputeAnalyses()
         }
         .onChange(of: game.generation) { _, _ in
@@ -77,11 +83,20 @@ struct TypeMatchupView: View {
     // MARK: Analyses caching
 
     private func recomputeAnalyses() {
-        let members: [TeamCheckAnalyzer.Member] = game.currentTeam.compactMap { member in
-            guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
+        let members: [TeamCheckAnalyzer.Member] = game.currentTeam.enumerated().compactMap { index, member in
+            guard let types = PokemonDatabase.shared.resolvedTypes(
+                for: member.pokemonName,
+                variant: member.variant
+            ) else {
                 return nil
             }
-            return .init(name: member.displayName, types: types)
+            return .init(
+                name: member.displayName,
+                types: types,
+                pokemonName: member.pokemonName,
+                variant: member.variant,
+                id: "team-\(index)-\(member.order)-\(member.displayName)"
+            )
         }
         cachedAnalyses = TeamCheckAnalyzer.analyze(team: members, generation: game.generation)
     }
@@ -116,13 +131,22 @@ struct TypeMatchupView: View {
 
     private var teamTypes: [[String]] {
         game.currentTeam.compactMap { member in
-            PokemonDatabase.shared.find(byName: member.pokemonName)?.types
+            PokemonDatabase.shared.resolvedTypes(for: member.pokemonName, variant: member.variant)
+        }
+    }
+
+    private var currentTeamSignature: [String] {
+        game.currentTeam.map { member in
+            "\(member.order)|\(member.pokemonName)|\(member.variant ?? "")"
         }
     }
 
     private func weakMembers(against attacker: String) -> [String] {
         game.currentTeam.compactMap { member in
-            guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
+            guard let types = PokemonDatabase.shared.resolvedTypes(
+                for: member.pokemonName,
+                variant: member.variant
+            ) else {
                 return nil
             }
             let m = TypeChart.defensiveMultiplier(
@@ -134,15 +158,23 @@ struct TypeMatchupView: View {
         }
     }
 
-    private func strongMembers(against defender: String) -> [String] {
-        game.currentTeam.compactMap { member in
-            guard let types = PokemonDatabase.shared.find(byName: member.pokemonName)?.types else {
+    private func strongMembers(against defender: String) -> [RelatedTeamMember] {
+        game.currentTeam.enumerated().compactMap { index, member in
+            guard let types = PokemonDatabase.shared.resolvedTypes(
+                for: member.pokemonName,
+                variant: member.variant
+            ) else {
                 return nil
             }
             let best = types.map {
                 TypeChart.effectiveness(attacker: $0, defender: defender, generation: game.generation)
             }.max() ?? 1.0
-            return best > 1.0 ? member.displayName : nil
+            guard best > 1.0 else { return nil }
+            return RelatedTeamMember(
+                id: "related-\(index)-\(member.order)-\(member.displayName)",
+                displayName: member.displayName,
+                pokemonName: member.pokemonName
+            )
         }
     }
 }
@@ -150,7 +182,7 @@ struct TypeMatchupView: View {
 private struct OffensiveMatchupCell: View {
     let type: String
     let multiplier: Double
-    let relatedMembers: [String]
+    let relatedMembers: [RelatedTeamMember]
 
     @State private var hoverShowsPopover = false
 
@@ -194,10 +226,10 @@ private struct OffensiveMatchupCell: View {
                     .font(.caption.weight(.semibold))
             }
             Divider()
-            ForEach(relatedMembers, id: \.self) { name in
+            ForEach(relatedMembers) { member in
                 HStack(spacing: 8) {
-                    PokemonSpriteView(pokemonName: name, size: 28)
-                    Text(name)
+                    PokemonSpriteView(pokemonName: member.pokemonName, size: 28)
+                    Text(member.displayName)
                         .font(.subheadline)
                 }
             }
@@ -230,7 +262,8 @@ private struct OffensiveMatchupCell: View {
     private var tooltip: String {
         let label = PokemonTypeLabel.german(for: type)
         if relatedMembers.isEmpty { return label }
-        return "\(label): \(relatedMembers.joined(separator: ", "))"
+        let names = relatedMembers.map(\.displayName).joined(separator: ", ")
+        return "\(label): \(names)"
     }
 
     private var accessibilityText: String {

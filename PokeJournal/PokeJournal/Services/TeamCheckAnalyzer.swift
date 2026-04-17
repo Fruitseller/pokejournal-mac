@@ -6,10 +6,31 @@
 import Foundation
 
 struct TeamMemberAnalysis: Equatable, Sendable {
+    let memberID: String
     let memberName: String
+    let pokemonName: String
+    let variant: String?
     let types: [String]
     let category: Category
     let reason: String?
+
+    init(
+        memberID: String? = nil,
+        memberName: String,
+        pokemonName: String? = nil,
+        variant: String? = nil,
+        types: [String],
+        category: Category,
+        reason: String?
+    ) {
+        self.memberID = memberID ?? pokemonName ?? memberName
+        self.memberName = memberName
+        self.pokemonName = pokemonName ?? memberName
+        self.variant = variant
+        self.types = types
+        self.category = category
+        self.reason = reason
+    }
 
     enum Category: Equatable, Sendable {
         case kernstueck
@@ -21,8 +42,25 @@ struct TeamMemberAnalysis: Equatable, Sendable {
 enum TeamCheckAnalyzer {
 
     struct Member: Equatable, Sendable {
+        let id: String
         let name: String
+        let pokemonName: String
+        let variant: String?
         let types: [String]
+
+        init(
+            name: String,
+            types: [String],
+            pokemonName: String? = nil,
+            variant: String? = nil,
+            id: String? = nil
+        ) {
+            self.id = id ?? pokemonName ?? name
+            self.name = name
+            self.pokemonName = pokemonName ?? name
+            self.variant = variant
+            self.types = types
+        }
     }
 
     static func analyze(
@@ -34,7 +72,10 @@ enum TeamCheckAnalyzer {
         if team.count == 1 {
             let m = team[0]
             return [TeamMemberAnalysis(
+                memberID: m.id,
                 memberName: m.name,
+                pokemonName: m.pokemonName,
+                variant: m.variant,
                 types: m.types,
                 category: .kernstueck,
                 reason: "Einziges Team-Mitglied"
@@ -89,7 +130,10 @@ enum TeamCheckAnalyzer {
 
         if hasUniqueBeitrag && removalHurtsTeam {
             return TeamMemberAnalysis(
+                memberID: member.id,
                 memberName: member.name,
+                pokemonName: member.pokemonName,
+                variant: member.variant,
                 types: member.types,
                 category: .kernstueck,
                 reason: kernstueckReason(uDef: uDef, uOff: uOff)
@@ -107,7 +151,10 @@ enum TeamCheckAnalyzer {
                 let reason = partner.map { "Redundant mit \($0.name)" }
                     ?? "Kein einzigartiger Beitrag"
                 return TeamMemberAnalysis(
+                    memberID: member.id,
                     memberName: member.name,
+                    pokemonName: member.pokemonName,
+                    variant: member.variant,
                     types: member.types,
                     category: .verzichtbar(ersatzTyp: ersatz),
                     reason: reason
@@ -115,7 +162,10 @@ enum TeamCheckAnalyzer {
             }
             // No recommendation possible — reduced team already has no weaknesses or gaps.
             return TeamMemberAnalysis(
+                memberID: member.id,
                 memberName: member.name,
+                pokemonName: member.pokemonName,
+                variant: member.variant,
                 types: member.types,
                 category: .ausgewogen,
                 reason: nil
@@ -123,7 +173,10 @@ enum TeamCheckAnalyzer {
         }
 
         return TeamMemberAnalysis(
+            memberID: member.id,
             memberName: member.name,
+            pokemonName: member.pokemonName,
+            variant: member.variant,
             types: member.types,
             category: .ausgewogen,
             reason: nil

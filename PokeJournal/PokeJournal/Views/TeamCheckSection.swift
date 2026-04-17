@@ -24,7 +24,7 @@ struct TeamCheckSection: View {
                         .foregroundStyle(.secondary)
                 }
                 VStack(spacing: 8) {
-                    ForEach(analyses, id: \.memberName) { analysis in
+                    ForEach(analyses, id: \.memberID) { analysis in
                         TeamCheckRow(analysis: analysis)
                     }
                 }
@@ -42,7 +42,7 @@ private struct TeamCheckRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            PokemonSpriteView(pokemonName: analysis.memberName, size: 40)
+            PokemonSpriteView(pokemonName: analysis.pokemonName, size: 40)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
