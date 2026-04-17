@@ -17,7 +17,7 @@ struct DefensiveBucketList: View {
             Text("Defensiv-Übersicht")
                 .font(.headline)
 
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
                 bucketSection(
                     title: "Kritisch",
                     symbol: "exclamationmark.octagon.fill",
@@ -44,8 +44,6 @@ struct DefensiveBucketList: View {
                     entries: immune
                 )
             }
-            .padding(12)
-            .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
         }
     }
 
@@ -83,40 +81,36 @@ struct DefensiveBucketList: View {
         if !entries.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 bucketHeader(title: title, symbol: symbol, tint: tint, count: entries.count)
-                ForEach(entries, id: \.type) { entry in
-                    defensiveRow(type: entry.type, multiplier: entry.multiplier)
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(entries, id: \.type) { entry in
+                        defensiveRow(type: entry.type, multiplier: entry.multiplier)
+                    }
                 }
             }
-            .padding(.vertical, 6)
-            Divider().opacity(0.5)
         }
     }
 
     @ViewBuilder
     private var neutralSection: some View {
         if !neutral.isEmpty {
-            VStack(alignment: .leading, spacing: 6) {
-                DisclosureGroup(isExpanded: $neutralExpanded) {
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 90), spacing: 8)],
-                        spacing: 8
-                    ) {
-                        ForEach(neutral, id: \.type) { entry in
-                            neutralChip(type: entry.type)
-                        }
+            DisclosureGroup(isExpanded: $neutralExpanded) {
+                LazyVGrid(
+                    columns: [GridItem(.adaptive(minimum: 90), spacing: 8)],
+                    spacing: 8
+                ) {
+                    ForEach(neutral, id: \.type) { entry in
+                        neutralChip(type: entry.type)
                     }
-                    .padding(.top, 4)
-                } label: {
-                    bucketHeader(
-                        title: "Neutral",
-                        symbol: "equal.circle",
-                        tint: .secondary,
-                        count: neutral.count
-                    )
                 }
+                .padding(.vertical, 4)
+            } label: {
+                bucketHeader(
+                    title: "Neutral",
+                    symbol: "equal.circle",
+                    tint: .secondary,
+                    count: neutral.count
+                )
             }
-            .padding(.vertical, 6)
-            Divider().opacity(0.5)
         }
     }
 
