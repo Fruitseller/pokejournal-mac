@@ -46,6 +46,26 @@ enum TeamCheckAnalyzer {
         }
     }
 
+    /// Categorize a team member via uniqueContribution + leaveOneOut.
+    ///
+    /// Branch reachability:
+    /// - `.kernstueck`: uniqueBeitrag AND removalHurts. Reached when uOff ≥ 1
+    ///   (since `removalHurtsTeam` reduces to `newGaps ≥ 1` in practice —
+    ///   `newWeaknesses` is always 0 because team profile is max-based, and
+    ///   `max(S \ {x}) ≤ max(S)` can never introduce a new ≥2× weakness).
+    /// - `.verzichtbar`: no uniqueBeitrag AND no removalHurts, plus ≥1 recommendation.
+    /// - `.ausgewogen` from the `isVerzichtbar` branch: reduced team already
+    ///   has no weaknesses AND no gaps, so `TypeChart.recommendation` returns
+    ///   empty. Effectively unreachable with canonical Pokémon type chart —
+    ///   requires every remaining member to be resistant-or-neutral against
+    ///   all attacker types, which no single- or dual-typed Pokémon satisfies
+    ///   (every type has at least one ×2 weakness). Kept as a defensive guard
+    ///   in case a future generation introduces a truly defensively perfect
+    ///   type combination.
+    /// - `.ausgewogen` final fallback: uDef ≥ 1 AND uOff = 0. Covered by
+    ///   `uniqueDefenseOnly_isAusgewogen` test.
+    /// - `!uniqueBeitrag && removalHurts` is unreachable because it would
+    ///   require uOff = 0 AND uOff ≥ 1 simultaneously.
     private static func categorize(
         at index: Int,
         in team: [Member],

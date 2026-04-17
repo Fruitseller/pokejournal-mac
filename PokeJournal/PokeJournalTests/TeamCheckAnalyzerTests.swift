@@ -40,11 +40,23 @@ struct TeamCheckAnalyzerTests {
             ],
             generation: .gen6plus
         )
+        // Grass-only teams are weak to ice/fire/flying/bug/poison and have
+        // offensive gaps elsewhere — recommendation must suggest one of those
+        // or a strong offensive complement.
+        let plausibleErsatz: Set<String> = [
+            "ice", "fire", "flying", "bug", "poison", "steel", "rock", "ground"
+        ]
         for analysis in result {
             #expect(
                 isVerzichtbar(analysis.category),
                 "Expected .verzichtbar for \(analysis.memberName), got \(analysis.category)"
             )
+            if case .verzichtbar(let ersatzTyp) = analysis.category {
+                #expect(
+                    plausibleErsatz.contains(ersatzTyp),
+                    "Expected plausible grass-complement for \(analysis.memberName), got \(ersatzTyp)"
+                )
+            }
         }
     }
 
@@ -60,6 +72,27 @@ struct TeamCheckAnalyzerTests {
         )
         let glurak = result.first { $0.memberName == "Glurak" }
         #expect(glurak?.category == .kernstueck)
+    }
+
+    @Test func uniqueDefenseOnly_isAusgewogen() {
+        // Pure fire + fire/rock:
+        // - Pure-fire has uniqueDefense > 0 (uniquely resists fire/ice/steel —
+        //   rock weakens fire/rock against those).
+        // - Pure-fire has uniqueOffense = 0 (fire/rock covers every offensive
+        //   type pure-fire hits).
+        // - Removing pure-fire creates no new gaps (uOff=0 → newGaps=0) and
+        //   no new weaknesses (max-based profile is monotone under removal).
+        // - hasUniqueBeitrag=true AND removalHurtsTeam=false → Case 4: Ausgewogen.
+        let result = TeamCheckAnalyzer.analyze(
+            team: [
+                .init(name: "Glut", types: ["fire"]),
+                .init(name: "Magcargo", types: ["fire", "rock"])
+            ],
+            generation: .gen6plus
+        )
+        let glut = result.first { $0.memberName == "Glut" }
+        #expect(glut?.category == .ausgewogen)
+        #expect(glut?.reason == nil)
     }
 
     @Test func categorization_differsByGeneration() {
