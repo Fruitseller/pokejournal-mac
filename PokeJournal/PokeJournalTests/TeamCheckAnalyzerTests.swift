@@ -9,6 +9,11 @@ import Testing
 
 struct TeamCheckAnalyzerTests {
 
+    private func isVerzichtbar(_ category: TeamMemberAnalysis.Category) -> Bool {
+        if case .verzichtbar = category { return true }
+        return false
+    }
+
     @Test func emptyTeam_returnsEmptyArray() {
         let result = TeamCheckAnalyzer.analyze(team: [], generation: .gen6plus)
         #expect(result.isEmpty)
@@ -36,11 +41,10 @@ struct TeamCheckAnalyzerTests {
             generation: .gen6plus
         )
         for analysis in result {
-            if case .verzichtbar = analysis.category {
-                // ok
-            } else {
-                Issue.record("Expected .verzichtbar for \(analysis.memberName), got \(analysis.category)")
-            }
+            #expect(
+                isVerzichtbar(analysis.category),
+                "Expected .verzichtbar for \(analysis.memberName), got \(analysis.category)"
+            )
         }
     }
 
@@ -56,5 +60,24 @@ struct TeamCheckAnalyzerTests {
         )
         let glurak = result.first { $0.memberName == "Glurak" }
         #expect(glurak?.category == .kernstueck)
+    }
+
+    @Test func categorization_differsByGeneration() {
+        // Bisasam (grass/poison) + Nidoking (poison/ground).
+        // In Gen 6+ poison hits fairy ×2 — offensive niche exists.
+        // In Gen 1 fairy doesn't exist; steel/dark don't exist either —
+        // different type pool → different gaps, weaknesses, ersatz candidates.
+        let team: [TeamCheckAnalyzer.Member] = [
+            .init(name: "Bisasam", types: ["grass", "poison"]),
+            .init(name: "Nidoking", types: ["poison", "ground"])
+        ]
+
+        let gen1 = TeamCheckAnalyzer.analyze(team: team, generation: .gen1)
+        let gen6 = TeamCheckAnalyzer.analyze(team: team, generation: .gen6plus)
+
+        let differs = zip(gen1, gen6).contains { a, b in
+            a.category != b.category || a.reason != b.reason
+        }
+        #expect(differs, "Gen 1 vs Gen 6+ analysis should diverge on identical team")
     }
 }
