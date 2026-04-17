@@ -35,7 +35,7 @@ struct TypeMatchupView: View {
                 }
             }
         }
-        .frame(minWidth: 520, minHeight: 640)
+        .frame(minWidth: 520)
         .onAppear(perform: recomputeAnalyses)
         .onChange(of: game.currentTeam.map(\.pokemonName)) { _, _ in
             recomputeAnalyses()
@@ -152,6 +152,8 @@ private struct OffensiveMatchupCell: View {
     let multiplier: Double
     let relatedMembers: [String]
 
+    @State private var hoverShowsPopover = false
+
     var body: some View {
         VStack(spacing: 4) {
             PokemonTypeIcon.image(for: type, size: 24)
@@ -172,9 +174,35 @@ private struct OffensiveMatchupCell: View {
                 .strokeBorder(outlineColor, lineWidth: outlineWidth)
         )
         .opacity(multiplier == 1.0 ? 0.4 : 1.0)
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            hoverShowsPopover = hovering && !relatedMembers.isEmpty
+        }
+        .popover(isPresented: $hoverShowsPopover, arrowEdge: .top) {
+            attackerPopover
+        }
         .help(tooltip)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
+    }
+
+    private var attackerPopover: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                PokemonTypeIcon.image(for: type, size: 14)
+                Text("Trifft \(PokemonTypeLabel.german(for: type)) mit \(multiplierLabel)")
+                    .font(.caption.weight(.semibold))
+            }
+            Divider()
+            ForEach(relatedMembers, id: \.self) { name in
+                HStack(spacing: 8) {
+                    PokemonSpriteView(pokemonName: name, size: 28)
+                    Text(name)
+                        .font(.subheadline)
+                }
+            }
+        }
+        .padding(12)
     }
 
     private var multiplierLabel: String {
