@@ -133,7 +133,7 @@ struct TypeMatchupView: View {
                     .foregroundStyle(.secondary)
                 FlowLayout(spacing: 8) {
                     ForEach(gaps, id: \.self) { type in
-                        Text(typeLabel(type))
+                        Text(PokemonTypeLabel.german(for: type))
                             .font(.caption)
                             .fontWeight(.semibold)
                             .padding(.horizontal, 8)
@@ -160,7 +160,7 @@ struct TypeMatchupView: View {
                         Circle()
                             .fill(PokemonTypeColor.color(for: type))
                             .frame(width: 12, height: 12)
-                        Text("Ein \(typeLabel(type))-Pokémon würde dein Team abrunden.")
+                        Text("Ein \(PokemonTypeLabel.german(for: type))-Pokémon würde dein Team abrunden.")
                             .font(.subheadline)
                     }
                 }
@@ -195,7 +195,7 @@ private struct MatchupCell: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(typeLabel(type))
+            Text(PokemonTypeLabel.german(for: type))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .lineLimit(1)
@@ -230,32 +230,9 @@ private struct MatchupCell: View {
 
     private var tooltip: String {
         if relatedMembers.isEmpty {
-            return typeLabel(type)
+            return PokemonTypeLabel.german(for: type)
         }
-        return "\(typeLabel(type)): \(relatedMembers.joined(separator: ", "))"
+        return "\(PokemonTypeLabel.german(for: type)): \(relatedMembers.joined(separator: ", "))"
     }
 }
 
-private func typeLabel(_ type: String) -> String {
-    switch type {
-    case "normal": return "Normal"
-    case "fire": return "Feuer"
-    case "water": return "Wasser"
-    case "electric": return "Elektro"
-    case "grass": return "Pflanze"
-    case "ice": return "Eis"
-    case "fighting": return "Kampf"
-    case "poison": return "Gift"
-    case "ground": return "Boden"
-    case "flying": return "Flug"
-    case "psychic": return "Psycho"
-    case "bug": return "Käfer"
-    case "rock": return "Gestein"
-    case "ghost": return "Geist"
-    case "dragon": return "Drache"
-    case "dark": return "Unlicht"
-    case "steel": return "Stahl"
-    case "fairy": return "Fee"
-    default: return type.capitalized
-    }
-}
