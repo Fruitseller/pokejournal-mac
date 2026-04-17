@@ -88,25 +88,6 @@ enum TeamCheckAnalyzer {
     }
 
     /// Categorize a team member via uniqueContribution + leaveOneOut.
-    ///
-    /// Branch reachability:
-    /// - `.kernstueck`: uniqueBeitrag AND removalHurts. Reached when uOff ≥ 1
-    ///   (since `removalHurtsTeam` reduces to `newGaps ≥ 1` in practice —
-    ///   `newWeaknesses` is always 0 because team profile is max-based, and
-    ///   `max(S \ {x}) ≤ max(S)` can never introduce a new ≥2× weakness).
-    /// - `.verzichtbar`: no uniqueBeitrag AND no removalHurts, plus ≥1 recommendation.
-    /// - `.ausgewogen` from the `isVerzichtbar` branch: reduced team already
-    ///   has no weaknesses AND no gaps, so `TypeChart.recommendation` returns
-    ///   empty. Effectively unreachable with canonical Pokémon type chart —
-    ///   requires every remaining member to be resistant-or-neutral against
-    ///   all attacker types, which no single- or dual-typed Pokémon satisfies
-    ///   (every type has at least one ×2 weakness). Kept as a defensive guard
-    ///   in case a future generation introduces a truly defensively perfect
-    ///   type combination.
-    /// - `.ausgewogen` final fallback: uDef ≥ 1 AND uOff = 0. Covered by
-    ///   `uniqueDefenseOnly_isAusgewogen` test.
-    /// - `!uniqueBeitrag && removalHurts` is unreachable because it would
-    ///   require uOff = 0 AND uOff ≥ 1 simultaneously.
     private static func categorize(
         at index: Int,
         in team: [Member],
@@ -227,21 +208,33 @@ enum TeamCheckAnalyzer {
         }.count
     }
 
-    /// Delta when removing a member: count of newly-introduced ≥×2 weaknesses and new offensive gaps.
+    /// Delta when removing a member: count of newly-introduced team-wide ≥×2 weaknesses
+    /// and new offensive gaps. A "new weakness" means the full team still had at least
+    /// one non-weak member (<×2), but every remaining member becomes weak after removal.
     private static func leaveOneOutDelta(
         fullTeam: [[String]],
         reducedTeam: [[String]],
         generation: TypeChartGeneration
     ) -> (newWeaknesses: Int, newGaps: Int) {
-        let fullProfile = TypeChart.teamDefensiveProfile(team: fullTeam, generation: generation)
-        let reducedProfile = TypeChart.teamDefensiveProfile(team: reducedTeam, generation: generation)
         let fullGaps = Set(TypeChart.coverageGaps(team: fullTeam, generation: generation))
         let reducedGaps = Set(TypeChart.coverageGaps(team: reducedTeam, generation: generation))
 
         let newWeaknesses = generation.allTypes.filter { attacker in
-            let before = fullProfile[attacker] ?? 1.0
-            let after = reducedProfile[attacker] ?? 1.0
-            return after >= 2.0 && before < 2.0
+            let beforeHasNonWeakMember = fullTeam.contains { defenderTypes in
+                TypeChart.defensiveMultiplier(
+                    attacker: attacker,
+                    defenderTypes: defenderTypes,
+                    generation: generation
+                ) < 2.0
+            }
+            let afterAllWeak = !reducedTeam.isEmpty && reducedTeam.allSatisfy { defenderTypes in
+                TypeChart.defensiveMultiplier(
+                    attacker: attacker,
+                    defenderTypes: defenderTypes,
+                    generation: generation
+                ) >= 2.0
+            }
+            return beforeHasNonWeakMember && afterAllWeak
         }.count
 
         let newGaps = reducedGaps.subtracting(fullGaps).count

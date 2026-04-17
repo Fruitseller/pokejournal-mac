@@ -74,19 +74,29 @@ struct TeamCheckAnalyzerTests {
         #expect(glurak?.category == .kernstueck)
     }
 
-    @Test func uniqueDefenseOnly_isAusgewogen() {
-        // Pure fire + fire/rock:
-        // - Pure-fire has uniqueDefense > 0 (uniquely resists fire/ice/steel —
-        //   rock weakens fire/rock against those).
-        // - Pure-fire has uniqueOffense = 0 (fire/rock covers every offensive
-        //   type pure-fire hits).
-        // - Removing pure-fire creates no new gaps (uOff=0 → newGaps=0) and
-        //   no new weaknesses (max-based profile is monotone under removal).
-        // - hasUniqueBeitrag=true AND removalHurtsTeam=false → Case 4: Ausgewogen.
+    @Test func uniqueDefenseOnly_canBeKernstueckWhenRemovalMakesTeamWeak() {
+        // Normal contributes no unique offense, but it is the only ghost immunity.
+        // Removing it from a normal + fire team leaves fire alone, creating new
+        // team-wide weaknesses (water/ground/rock) that did not exist before.
+        let result = TeamCheckAnalyzer.analyze(
+            team: [
+                .init(name: "Relaxo", types: ["normal"]),
+                .init(name: "Glut", types: ["fire"])
+            ],
+            generation: .gen6plus
+        )
+        let relaxo = result.first { $0.memberName == "Relaxo" }
+        #expect(relaxo?.category == .kernstueck)
+    }
+
+    @Test func uniqueDefenseOnly_withoutTeamWideWeaknesses_isAusgewogen() {
+        // Pure fire has uniqueDefense > 0, while fire/ground covers all of its
+        // offensive contribution. Removing pure fire does not make the reduced
+        // team newly weak across all remaining members.
         let result = TeamCheckAnalyzer.analyze(
             team: [
                 .init(name: "Glut", types: ["fire"]),
-                .init(name: "Magcargo", types: ["fire", "rock"])
+                .init(name: "Knogga", types: ["fire", "ground"])
             ],
             generation: .gen6plus
         )
