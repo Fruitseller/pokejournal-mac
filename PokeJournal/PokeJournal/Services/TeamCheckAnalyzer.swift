@@ -52,6 +52,56 @@ enum TeamCheckAnalyzer {
         generation: TypeChartGeneration
     ) -> TeamMemberAnalysis {
         let member = team[index]
+        let others = team.enumerated()
+            .filter { $0.offset != index }
+            .map { $0.element }
+
+        let uDef = uniqueDefense(memberTypes: member.types, others: others, generation: generation)
+        let uOff = uniqueOffense(memberTypes: member.types, others: others, generation: generation)
+        let delta = leaveOneOutDelta(
+            fullTeam: team.map(\.types),
+            reducedTeam: others.map(\.types),
+            generation: generation
+        )
+
+        let hasUniqueBeitrag = (uDef + uOff) >= 1
+        let removalHurtsTeam = (delta.newGaps >= 1 || delta.newWeaknesses >= 1)
+
+        if hasUniqueBeitrag && removalHurtsTeam {
+            return TeamMemberAnalysis(
+                memberName: member.name,
+                types: member.types,
+                category: .kernstueck,
+                reason: kernstueckReason(uDef: uDef, uOff: uOff)
+            )
+        }
+
+        let isVerzichtbar = !hasUniqueBeitrag && !removalHurtsTeam
+        if isVerzichtbar {
+            let recommendations = TypeChart.recommendation(
+                team: others.map(\.types),
+                generation: generation
+            )
+            if let ersatz = recommendations.first {
+                let partner = overlapPartner(memberTypes: member.types, others: others)
+                let reason = partner.map { "Redundant mit \($0.name)" }
+                    ?? "Kein einzigartiger Beitrag"
+                return TeamMemberAnalysis(
+                    memberName: member.name,
+                    types: member.types,
+                    category: .verzichtbar(ersatzTyp: ersatz),
+                    reason: reason
+                )
+            }
+            // No recommendation possible — reduced team already has no weaknesses or gaps.
+            return TeamMemberAnalysis(
+                memberName: member.name,
+                types: member.types,
+                category: .ausgewogen,
+                reason: nil
+            )
+        }
+
         return TeamMemberAnalysis(
             memberName: member.name,
             types: member.types,
