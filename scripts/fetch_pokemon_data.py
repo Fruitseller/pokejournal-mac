@@ -119,7 +119,7 @@ def main():
     # Type ID to name mapping
     type_id_to_name = {row['id']: row['identifier'] for row in type_names_csv}
 
-    # Pokemon types
+    # Pokemon types (keyed by pokemon_id, which covers both base and form rows)
     pokemon_types = {}
     for row in types_csv:
         pid = row['pokemon_id']
@@ -128,17 +128,65 @@ def main():
             pokemon_types[pid] = []
         pokemon_types[pid].append(type_name)
 
-    # Build Pokemon list (only base forms, not variants)
+    # Regional form extraction: identifier suffix → canonical region label.
+    # Longer suffixes first so "-galar-standard" wins over "-galar".
+    REGIONAL_SUFFIXES = [
+        ("-paldea-combat-breed", "paldea"),
+        ("-galar-standard", "galar"),
+        ("-alola", "alola"),
+        ("-galar", "galar"),
+        ("-hisui", "hisui"),
+        ("-paldea", "paldea"),
+    ]
+
+    def extract_regional_form(identifier):
+        """Return (base_identifier, region) if this is a regional form, else None.
+
+        Filters out totem/cap/gmax/etc. variants that happen to contain a region
+        suffix (e.g. raticate-alola-totem). Base identifier is whatever remains
+        after the region suffix is stripped; if it still contains qualifier
+        segments (totem, gmax, ...), the form is skipped.
+        """
+        for suffix, region in REGIONAL_SUFFIXES:
+            if identifier.endswith(suffix):
+                base = identifier[: -len(suffix)]
+                if not base:
+                    return None
+                if any(seg in base for seg in ("totem", "gmax", "cap", "starter")):
+                    return None
+                return base, region
+        return None
+
+    # Collect regional variants: species_id -> {region: {"types": [...]}}
+    species_variants = {}
+    for row in pokemon_csv:
+        pid = row['id']
+        species_id = row['species_id']
+        if int(pid) <= 10000:
+            continue
+
+        form = extract_regional_form(row['identifier'])
+        if form is None:
+            continue
+
+        _, region = form
+        variants = species_variants.setdefault(species_id, {})
+        # First match wins; prevents e.g. "galar-standard" being overwritten
+        # by a later "galar-zen" row (which wouldn't match anyway, but belt-and-braces).
+        if region in variants:
+            continue
+        variants[region] = {"types": pokemon_types.get(pid, [])}
+
+    # Build Pokemon list (base forms only; variants are nested per base entry)
     pokemon_data = []
     for row in pokemon_csv:
         pid = row['id']
         species_id = row['species_id']
 
-        # Skip forms/variants (id > 10000 or id != species_id for most cases)
         if int(pid) > 10000:
             continue
 
-        pokemon_data.append({
+        entry = {
             "id": int(pid),
             "name_de": german_names.get(species_id, row['identifier'].title()),
             "name_en": english_names.get(species_id, row['identifier'].title()),
@@ -146,7 +194,10 @@ def main():
             "sprite_url": f"{SPRITE_BASE}/other/official-artwork/{pid}.png",
             "sprite_pixel_url": f"{SPRITE_BASE}/{pid}.png",
             "evolution_chain_id": evolution_chains.get(species_id)
-        })
+        }
+        if species_id in species_variants:
+            entry["variants"] = species_variants[species_id]
+        pokemon_data.append(entry)
 
     # Sort and limit
     pokemon_data.sort(key=lambda x: x['id'])
