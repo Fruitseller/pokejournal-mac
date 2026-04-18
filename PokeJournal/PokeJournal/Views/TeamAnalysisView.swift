@@ -56,7 +56,7 @@ struct HallOfFameSection: View {
                                 .fill(medalColor(for: index).opacity(0.2))
                                 .frame(width: 70, height: 70)
 
-                            PokemonSpriteView(pokemonName: poke.name, size: 56)
+                            PokemonSpriteView(pokemonName: poke.pokemonName, variant: poke.variant, size: 56)
 
                             if index < 3 {
                                 Image(systemName: "medal.fill")

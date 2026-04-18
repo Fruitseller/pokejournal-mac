@@ -8,6 +8,12 @@ import Foundation
 struct Pokemon: Codable, Identifiable, Hashable {
     struct Variant: Codable, Hashable {
         let types: [String]
+        let spriteID: Int?
+
+        enum CodingKeys: String, CodingKey {
+            case types
+            case spriteID = "sprite_id"
+        }
     }
 
     let id: Int
@@ -94,6 +100,17 @@ class PokemonDatabase {
         }
 
         return pokemon.types
+    }
+
+    func spriteAssetName(for pokemonName: String, variant: String?) -> String? {
+        guard let pokemon = find(byName: pokemonName) else { return nil }
+
+        if let region = Self.normalizedVariant(variant),
+           let spriteID = pokemon.variants?[region]?.spriteID {
+            return "pokemon_\(spriteID)"
+        }
+
+        return "pokemon_\(pokemon.id)"
     }
 
     func fuzzyMatch(name: String) -> Pokemon? {

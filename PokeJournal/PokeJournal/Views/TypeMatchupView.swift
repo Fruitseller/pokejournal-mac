@@ -9,6 +9,7 @@ private struct RelatedTeamMember: Identifiable {
     let id: String
     let displayName: String
     let pokemonName: String
+    let variant: String?
 }
 
 struct TypeMatchupView: View {
@@ -173,7 +174,8 @@ struct TypeMatchupView: View {
             return RelatedTeamMember(
                 id: "related-\(index)-\(member.order)-\(member.displayName)",
                 displayName: member.displayName,
-                pokemonName: member.pokemonName
+                pokemonName: member.pokemonName,
+                variant: member.variant
             )
         }
     }
@@ -228,7 +230,7 @@ private struct OffensiveMatchupCell: View {
             Divider()
             ForEach(relatedMembers) { member in
                 HStack(spacing: 8) {
-                    PokemonSpriteView(pokemonName: member.pokemonName, size: 28)
+                    PokemonSpriteView(pokemonName: member.pokemonName, variant: member.variant, size: 28)
                     Text(member.displayName)
                         .font(.subheadline)
                 }

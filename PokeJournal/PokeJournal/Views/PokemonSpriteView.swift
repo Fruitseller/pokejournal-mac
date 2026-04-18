@@ -7,15 +7,22 @@ import SwiftUI
 
 struct PokemonSpriteView: View {
     let pokemonName: String
+    let variant: String?
     let size: CGFloat
 
-    private var pokemon: Pokemon? {
-        PokemonDatabase.shared.find(byName: pokemonName)
+    init(pokemonName: String, variant: String? = nil, size: CGFloat) {
+        self.pokemonName = pokemonName
+        self.variant = variant
+        self.size = size
     }
 
     private var assetName: String? {
-        guard let pokemon = pokemon else { return nil }
-        return "pokemon_\(pokemon.id)"
+        PokemonDatabase.shared.spriteAssetName(for: pokemonName, variant: variant)
+    }
+
+    private var accessibilityText: String {
+        if let variant { return "\(variant) \(pokemonName)" }
+        return pokemonName
     }
 
     var body: some View {
@@ -26,6 +33,7 @@ struct PokemonSpriteView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size, height: size)
+                    .accessibilityLabel(accessibilityText)
             } else {
                 fallbackImage
             }
@@ -37,6 +45,7 @@ struct PokemonSpriteView: View {
             .font(.system(size: size * 0.6))
             .foregroundStyle(.quaternary)
             .frame(width: size, height: size)
+            .accessibilityLabel("Unbekanntes Pokémon")
     }
 }
 

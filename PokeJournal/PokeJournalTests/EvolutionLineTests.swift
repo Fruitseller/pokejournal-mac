@@ -91,6 +91,27 @@ struct EvolutionLineLookupTests {
         let types = db.resolvedTypes(for: "Raichu", variant: "Aloha")
         #expect(types == ["electric", "psychic"])
     }
+
+    @Test func spriteAssetName_baseFormReturnsBaseID() {
+        #expect(db.spriteAssetName(for: "Raichu", variant: nil) == "pokemon_26")
+    }
+
+    @Test func spriteAssetName_variantReturnsFormID() {
+        // Alolan Raichu has PokéAPI form id 10100
+        #expect(db.spriteAssetName(for: "Raichu", variant: "Alola") == "pokemon_10100")
+    }
+
+    @Test func spriteAssetName_variantAliasAloha() {
+        #expect(db.spriteAssetName(for: "Raichu", variant: "Aloha") == "pokemon_10100")
+    }
+
+    @Test func spriteAssetName_unknownVariantFallsBackToBase() {
+        #expect(db.spriteAssetName(for: "Raichu", variant: "NonExistent") == "pokemon_26")
+    }
+
+    @Test func spriteAssetName_unknownPokemonReturnsNil() {
+        #expect(db.spriteAssetName(for: "TotallyUnknownMon", variant: nil) == nil)
+    }
 }
 
 // MARK: - TeamDiff Evolution Detection Tests

@@ -157,8 +157,9 @@ def main():
                 return base, region
         return None
 
-    # Collect regional variants: species_id -> {region: {"types": [...]}}
+    # Collect regional variants: species_id -> {region: {"types": [...], "sprite_id": int}}
     species_variants = {}
+    variant_form_ids = []
     for row in pokemon_csv:
         pid = row['id']
         species_id = row['species_id']
@@ -175,7 +176,11 @@ def main():
         # by a later "galar-zen" row (which wouldn't match anyway, but belt-and-braces).
         if region in variants:
             continue
-        variants[region] = {"types": pokemon_types.get(pid, [])}
+        variants[region] = {
+            "types": pokemon_types.get(pid, []),
+            "sprite_id": int(pid),
+        }
+        variant_form_ids.append(int(pid))
 
     # Build Pokemon list (base forms only; variants are nested per base entry)
     pokemon_data = []
@@ -213,6 +218,10 @@ def main():
     with open(ASSETS_DIR / "Contents.json", 'w') as f:
         json.dump({"info": {"author": "xcode", "version": 1}}, f, indent=2)
 
+    # Collect all sprite IDs: base forms + regional variants
+    sprite_ids = [p['id'] for p in pokemon_data]
+    sprite_ids.extend(variant_form_ids)
+
     # Download sprites (from GitHub, not API)
     print(f"\nDownloading sprites ({workers} parallel)...")
     completed = 0
@@ -220,8 +229,8 @@ def main():
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {
-            executor.submit(download_sprite, p['id'], ASSETS_DIR): p['id']
-            for p in pokemon_data
+            executor.submit(download_sprite, sid, ASSETS_DIR): sid
+            for sid in sprite_ids
         }
 
         for future in as_completed(futures):

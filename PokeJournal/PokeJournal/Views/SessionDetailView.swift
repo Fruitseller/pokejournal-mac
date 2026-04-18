@@ -164,7 +164,7 @@ struct AnnotatedTeamMemberCard: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            PokemonSpriteView(pokemonName: member.pokemonName, size: 64)
+            PokemonSpriteView(pokemonName: member.pokemonName, variant: member.variant, size: 64)
 
             Text(member.displayName)
                 .font(.caption)
@@ -230,7 +230,7 @@ struct RemovedTeamMemberCard: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            PokemonSpriteView(pokemonName: member.pokemonName, size: 64)
+            PokemonSpriteView(pokemonName: member.pokemonName, variant: member.variant, size: 64)
                 .opacity(0.4)
 
             Text(member.displayName)

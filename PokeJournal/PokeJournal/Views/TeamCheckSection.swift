@@ -42,7 +42,7 @@ private struct TeamCheckRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            PokemonSpriteView(pokemonName: analysis.pokemonName, size: 40)
+            PokemonSpriteView(pokemonName: analysis.pokemonName, variant: analysis.variant, size: 40)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
