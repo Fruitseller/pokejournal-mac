@@ -135,20 +135,20 @@ struct DefensiveBucketList: View {
 
     private func defensiveRow(type: String, multiplier: Double) -> some View {
         let members = affectedMembers(type)
-        return HStack(spacing: 10) {
-            PokemonTypeIcon.image(for: type, size: 18)
-            Text(PokemonTypeLabel.german(for: type))
-                .font(.subheadline)
-            Text(multiplierLabel(multiplier))
-                .font(.subheadline.monospacedDigit())
-                .foregroundStyle(.secondary)
-            Spacer()
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 10) {
+                PokemonTypeIcon.image(for: type, size: 18)
+                Text(PokemonTypeLabel.german(for: type))
+                    .font(.subheadline)
+                Text(multiplierLabel(multiplier))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
             if !members.isEmpty {
                 Text(members.joined(separator: ", "))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                    .padding(.leading, 28)
             }
         }
         .padding(.vertical, 2)
