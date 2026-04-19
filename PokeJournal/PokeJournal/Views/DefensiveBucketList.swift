@@ -123,6 +123,7 @@ struct DefensiveBucketList: View {
         HStack(spacing: 6) {
             Image(systemName: symbol)
                 .foregroundStyle(tint)
+                .accessibilityHidden(true)
             Text(title)
                 .font(.subheadline.weight(.semibold))
             Spacer()

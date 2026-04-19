@@ -103,7 +103,9 @@ struct UsageStatsSection: View {
             ForEach(Array(usage.enumerated()), id: \.offset) { _, poke in
                 HStack {
                     Text(poke.name)
-                        .frame(width: 120, alignment: .leading)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .frame(minWidth: 80, idealWidth: 120, maxWidth: 160, alignment: .leading)
 
                     GeometryReader { geometry in
                         let maxCount = usage.first?.count ?? 1
@@ -114,6 +116,7 @@ struct UsageStatsSection: View {
                             .frame(width: max(width, 4), height: 20)
                     }
                     .frame(height: 20)
+                    .layoutPriority(-1)
 
                     Text("\(poke.count)")
                         .font(.caption)

@@ -189,25 +189,30 @@ private struct OffensiveMatchupCell: View {
     @State private var hoverShowsPopover = false
 
     var body: some View {
-        VStack(spacing: 4) {
+        let dimmed = multiplier == 1.0
+        let chromeOpacity: Double = dimmed ? 0.4 : 1.0
+
+        return VStack(spacing: 4) {
             PokemonTypeIcon.image(for: type, size: 24)
+                .opacity(chromeOpacity)
             Text(PokemonTypeLabel.german(for: type))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+                .foregroundStyle(dimmed ? .secondary : .primary)
             Text(multiplierLabel)
                 .font(.caption2.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
-        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 8))
+        .background(.fill.quaternary.opacity(chromeOpacity), in: RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(outlineColor, lineWidth: outlineWidth)
+                .opacity(chromeOpacity)
         )
-        .opacity(multiplier == 1.0 ? 0.4 : 1.0)
         .contentShape(Rectangle())
         .onHover { hovering in
             hoverShowsPopover = hovering && !relatedMembers.isEmpty
