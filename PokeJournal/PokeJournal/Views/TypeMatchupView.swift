@@ -27,9 +27,9 @@ struct TypeMatchupView: View {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 32) {
                     defensiveSection
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(minWidth: 400, maxWidth: .infinity, alignment: .leading)
                     offensiveSection
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(minWidth: 400, maxWidth: .infinity, alignment: .leading)
                 }
                 VStack(alignment: .leading, spacing: 24) {
                     defensiveSection
