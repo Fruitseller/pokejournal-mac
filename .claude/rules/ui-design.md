@@ -36,7 +36,7 @@ The reviewer should evaluate code changes and SwiftUI previews directly.
 
 - `ContentView` → `NavigationSplitView` (sidebar + detail)
 - `Views/GameListView` → Sidebar game list
-- `Views/GameDetailView` → Detail pane with 5 tabs: Sessions, Timeline, Heatmap, Team Analysis, Team Evolution
+- `Views/GameDetailView` → Detail pane with 6 tabs: Sessions, Timeline, Heatmap, Hall of Fame, Team Evolution, Team-Check
 - `Views/SessionDetailView` → Session detail (navigated from session list)
 - `Views/SettingsView` → Modal sheet from toolbar
 - `Views/VaultSetupView` → First-run vault selection

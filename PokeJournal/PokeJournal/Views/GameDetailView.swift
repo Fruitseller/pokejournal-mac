@@ -40,8 +40,9 @@ struct GameDetailContent: View {
                 Text("Sessions").tag(0)
                 Text("Timeline").tag(1)
                 Text("Heatmap").tag(2)
-                Text("Team-Analyse").tag(3)
+                Text("Hall of Fame").tag(3)
                 Text("Team-Entwicklung").tag(4)
+                Text("Team-Check").tag(5)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -57,6 +58,8 @@ struct GameDetailContent: View {
                 TeamAnalysisView(game: game)
             case 4:
                 TeamEvolutionView(game: game)
+            case 5:
+                TypeMatchupView(game: game)
             default:
                 EmptyView()
             }
@@ -196,23 +199,11 @@ struct StatCard: View {
 
 struct CurrentTeamView: View {
     let game: Game
-    @State private var showMatchup = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Aktuelles Team")
-                    .font(.headline)
-                Spacer()
-                Button {
-                    showMatchup = true
-                } label: {
-                    Label("Typ-Matchup", systemImage: "shield.lefthalf.filled")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .accessibilityIdentifier("typMatchupButton")
-            }
+            Text("Aktuelles Team")
+                .font(.headline)
 
             LazyVGrid(columns: [
                 GridItem(.adaptive(minimum: 100, maximum: 150), spacing: 12)
@@ -223,9 +214,6 @@ struct CurrentTeamView: View {
             }
         }
         .padding()
-        .sheet(isPresented: $showMatchup) {
-            TypeMatchupView(game: game)
-        }
     }
 }
 

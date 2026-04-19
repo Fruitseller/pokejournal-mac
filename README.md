@@ -8,9 +8,9 @@ A native macOS app for visualizing and analyzing Pokémon gaming sessions from y
 
 ## Screenshots
 
-| Sessions | Team Analysis |
-|----------|---------------|
-| ![Sessions Overview](screenshots/sessions-overview.png) | ![Team Analysis](screenshots/team-analysis.png) |
+| Sessions | Hall of Fame |
+|----------|--------------|
+| ![Sessions Overview](screenshots/sessions-overview.png) | ![Hall of Fame](screenshots/team-analysis.png) |
 
 ## Philosophy
 

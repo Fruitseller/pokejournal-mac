@@ -10,7 +10,7 @@ struct TeamCheckSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Team-Check")
+            Text("Empfehlungen")
                 .font(.headline)
 
             if analyses.isEmpty {

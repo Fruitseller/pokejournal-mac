@@ -14,35 +14,24 @@ private struct RelatedTeamMember: Identifiable {
 
 struct TypeMatchupView: View {
     let game: Game
-    @Environment(\.dismiss) private var dismiss
     @State private var cachedAnalyses: [TeamMemberAnalysis] = []
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    header
-                    Divider()
-                    TeamCheckSection(analyses: cachedAnalyses)
-                    Divider()
-                    DefensiveBucketList(
-                        profile: defensiveProfile,
-                        generation: game.generation,
-                        affectedMembers: weakMembers(against:)
-                    )
-                    offensiveSection
-                }
-                .padding()
+        VStack(alignment: .leading, spacing: 24) {
+            HStack {
+                Spacer()
+                generationBadge
             }
-            .navigationTitle("Typ-Matchup")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Fertig") { dismiss() }
-                        .accessibilityIdentifier("typMatchupDoneButton")
-                }
-            }
+            TeamCheckSection(analyses: cachedAnalyses)
+            Divider()
+            DefensiveBucketList(
+                profile: defensiveProfile,
+                generation: game.generation,
+                affectedMembers: weakMembers(against:)
+            )
+            offensiveSection
         }
-        .frame(minWidth: 520)
+        .padding()
         .onAppear(perform: recomputeAnalyses)
         .onChange(of: currentTeamSignature) { _, _ in
             recomputeAnalyses()
@@ -53,16 +42,6 @@ struct TypeMatchupView: View {
     }
 
     // MARK: Header
-
-    private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(game.displayName)
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            Spacer()
-            generationBadge
-        }
-    }
 
     private var generationBadge: some View {
         let label: String = {

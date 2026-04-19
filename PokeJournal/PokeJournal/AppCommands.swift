@@ -41,12 +41,16 @@ struct AppCommands: Commands {
                 .keyboardShortcut("3", modifiers: .command)
                 .disabled(selectedTabBinding == nil)
 
-            Button("Team-Analyse") { selectedTabBinding?.wrappedValue = 3 }
+            Button("Hall of Fame") { selectedTabBinding?.wrappedValue = 3 }
                 .keyboardShortcut("4", modifiers: .command)
                 .disabled(selectedTabBinding == nil)
 
             Button("Team-Entwicklung") { selectedTabBinding?.wrappedValue = 4 }
                 .keyboardShortcut("5", modifiers: .command)
+                .disabled(selectedTabBinding == nil)
+
+            Button("Team-Check") { selectedTabBinding?.wrappedValue = 5 }
+                .keyboardShortcut("6", modifiers: .command)
                 .disabled(selectedTabBinding == nil)
         }
     }
