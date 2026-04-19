@@ -126,10 +126,13 @@ struct DefensiveBucketList: View {
                 .accessibilityHidden(true)
             Text(title)
                 .font(.subheadline.weight(.semibold))
-            Spacer()
             Text("\(count)")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 1)
+                .background(.fill.quaternary, in: Capsule())
+            Spacer()
         }
     }
 

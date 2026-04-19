@@ -24,12 +24,18 @@ struct TypeMatchupView: View {
             }
             TeamCheckSection(analyses: cachedAnalyses)
             Divider()
-            DefensiveBucketList(
-                profile: defensiveProfile,
-                generation: game.generation,
-                affectedMembers: weakMembers(against:)
-            )
-            offensiveSection
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 32) {
+                    defensiveSection
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    offensiveSection
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                VStack(alignment: .leading, spacing: 24) {
+                    defensiveSection
+                    offensiveSection
+                }
+            }
         }
         .padding()
         .onAppear(perform: recomputeAnalyses)
@@ -39,6 +45,14 @@ struct TypeMatchupView: View {
         .onChange(of: game.generation) { _, _ in
             recomputeAnalyses()
         }
+    }
+
+    private var defensiveSection: some View {
+        DefensiveBucketList(
+            profile: defensiveProfile,
+            generation: game.generation,
+            affectedMembers: weakMembers(against:)
+        )
     }
 
     // MARK: Header
