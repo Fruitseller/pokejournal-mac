@@ -20,6 +20,7 @@ final class VaultManager {
 
     private(set) var vaultURL: URL?
     private(set) var isAccessingVault = false
+    private(set) var isTestVault = false
 
     var pokemonFolderURL: URL? {
         vaultURL?.appendingPathComponent(pokemonSubpath)
@@ -34,7 +35,66 @@ final class VaultManager {
     }
 
     private init() {
-        restoreBookmark()
+        tryBootstrapTestVault(
+            arguments: ProcessInfo.processInfo.arguments,
+            containerRoot: Self.defaultApplicationSupportURL(),
+            materializer: TestVaultFixture.materialize(into:)
+        )
+        if !isTestVault {
+            restoreBookmark()
+        }
+    }
+
+    init(
+        arguments: [String],
+        containerRoot: URL,
+        materializer: (URL) throws -> Void
+    ) {
+        tryBootstrapTestVault(
+            arguments: arguments,
+            containerRoot: containerRoot,
+            materializer: materializer
+        )
+    }
+
+    init(testVaultURL: URL) {
+        self.vaultURL = testVaultURL
+        self.isTestVault = true
+    }
+
+    private func tryBootstrapTestVault(
+        arguments: [String],
+        containerRoot: URL,
+        materializer: (URL) throws -> Void
+    ) {
+        guard let testURL = Self.testVaultURL(from: arguments, containerRoot: containerRoot) else {
+            return
+        }
+        do {
+            try FileManager.default.createDirectory(
+                at: testURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try materializer(testURL)
+            vaultURL = testURL
+            isTestVault = true
+        } catch {
+            logger.error("Failed to materialize test vault: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    static func testVaultURL(from arguments: [String], containerRoot: URL) -> URL? {
+        guard let index = arguments.firstIndex(of: "-UseTestVault"),
+              index + 1 < arguments.count,
+              arguments[index + 1] == "YES" else {
+            return nil
+        }
+        return containerRoot.appendingPathComponent("TestVault")
+    }
+
+    private static func defaultApplicationSupportURL() -> URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
     }
 
     func selectVault() {
@@ -93,6 +153,11 @@ final class VaultManager {
     func startAccessingVault() -> Bool {
         guard let url = vaultURL else { return false }
 
+        if isTestVault {
+            isAccessingVault = true
+            return true
+        }
+
         if url.startAccessingSecurityScopedResource() {
             isAccessingVault = true
             return true
@@ -102,7 +167,9 @@ final class VaultManager {
 
     func stopAccessingVault() {
         guard isAccessingVault, let url = vaultURL else { return }
-        url.stopAccessingSecurityScopedResource()
+        if !isTestVault {
+            url.stopAccessingSecurityScopedResource()
+        }
         isAccessingVault = false
     }
 

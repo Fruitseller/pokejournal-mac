@@ -15,7 +15,8 @@ struct Poke_JournalApp: App {
             OldSession.self,
             TeamMember.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let isTestVault = VaultManager.shared.isTestVault
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isTestVault)
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
