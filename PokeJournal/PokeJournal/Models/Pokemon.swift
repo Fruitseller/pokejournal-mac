@@ -102,15 +102,15 @@ class PokemonDatabase {
         return pokemon.types
     }
 
-    func spriteAssetName(for pokemonName: String, variant: String?) -> String? {
+    func spriteAssetName(for pokemonName: String, variant: String?, style: SpriteStyle = .official) -> String? {
         guard let pokemon = find(byName: pokemonName) else { return nil }
 
         if let region = Self.normalizedVariant(variant),
            let spriteID = pokemon.variants?[region]?.spriteID {
-            return "pokemon_\(spriteID)"
+            return style.assetName(forPokemonID: spriteID)
         }
 
-        return "pokemon_\(pokemon.id)"
+        return style.assetName(forPokemonID: pokemon.id)
     }
 
     func fuzzyMatch(name: String) -> Pokemon? {

@@ -36,9 +36,9 @@ def fetch_csv(url):
     text = fetch_text(url)
     return list(csv.DictReader(io.StringIO(text)))
 
-def download_sprite(pokemon_id, sprites_dir):
-    """Download sprite for Pokemon."""
-    imageset_dir = sprites_dir / f"pokemon_{pokemon_id}.imageset"
+def download_sprite_asset(pokemon_id, sprites_dir, asset_prefix, url):
+    """Download one sprite asset variant for Pokemon."""
+    imageset_dir = sprites_dir / f"{asset_prefix}_{pokemon_id}.imageset"
     sprite_path = imageset_dir / f"{pokemon_id}.png"
 
     # Skip if already exists
@@ -48,7 +48,6 @@ def download_sprite(pokemon_id, sprites_dir):
     imageset_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        url = f"{SPRITE_BASE}/other/official-artwork/{pokemon_id}.png"
         req = urllib.request.Request(url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=30) as response:
             with open(sprite_path, 'wb') as f:
@@ -64,6 +63,15 @@ def download_sprite(pokemon_id, sprites_dir):
         return True
     except Exception as e:
         return False
+
+def download_sprite(pokemon_id, sprites_dir):
+    """Download official artwork and pixel sprite for Pokemon."""
+    official_url = f"{SPRITE_BASE}/other/official-artwork/{pokemon_id}.png"
+    pixel_url = f"{SPRITE_BASE}/{pokemon_id}.png"
+
+    official_ok = download_sprite_asset(pokemon_id, sprites_dir, "pokemon", official_url)
+    pixel_ok = download_sprite_asset(pokemon_id, sprites_dir, "pixel_pokemon", pixel_url)
+    return official_ok and pixel_ok
 
 def main():
     limit = None

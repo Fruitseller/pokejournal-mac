@@ -9,6 +9,7 @@ struct PokemonSpriteView: View {
     let pokemonName: String
     let variant: String?
     let size: CGFloat
+    @AppStorage("spriteStyle") private var spriteStyle: SpriteStyle = .official
 
     init(pokemonName: String, variant: String? = nil, size: CGFloat) {
         self.pokemonName = pokemonName
@@ -17,7 +18,12 @@ struct PokemonSpriteView: View {
     }
 
     private var assetName: String? {
-        PokemonDatabase.shared.spriteAssetName(for: pokemonName, variant: variant)
+        PokemonDatabase.shared.spriteAssetName(for: pokemonName, variant: variant, style: spriteStyle)
+    }
+
+    private var fallbackAssetName: String? {
+        guard spriteStyle != .official else { return nil }
+        return PokemonDatabase.shared.spriteAssetName(for: pokemonName, variant: variant, style: .official)
     }
 
     private var accessibilityText: String {
@@ -29,6 +35,13 @@ struct PokemonSpriteView: View {
         Group {
             if let assetName = assetName,
                let nsImage = NSImage(named: assetName) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size, height: size)
+                    .accessibilityLabel(accessibilityText)
+            } else if let fallbackAssetName,
+                      let nsImage = NSImage(named: fallbackAssetName) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)

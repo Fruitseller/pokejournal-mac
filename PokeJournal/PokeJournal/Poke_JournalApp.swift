@@ -8,6 +8,8 @@ import SwiftData
 
 @main
 struct Poke_JournalApp: App {
+    @AppStorage("appTheme") private var appTheme: AppTheme = .system
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Game.self,
@@ -28,6 +30,7 @@ struct Poke_JournalApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(appTheme.colorScheme)
         }
         .modelContainer(sharedModelContainer)
         .commands {
@@ -38,6 +41,7 @@ struct Poke_JournalApp: App {
         WindowGroup("Spiel", id: "game", for: String.self) { $gameName in
             if let name = gameName {
                 GameWindowView(gameName: name)
+                    .preferredColorScheme(appTheme.colorScheme)
                     .modelContainer(sharedModelContainer)
             }
         }
@@ -45,6 +49,7 @@ struct Poke_JournalApp: App {
 
         Settings {
             SettingsView()
+                .preferredColorScheme(appTheme.colorScheme)
                 .modelContainer(sharedModelContainer)
         }
     }

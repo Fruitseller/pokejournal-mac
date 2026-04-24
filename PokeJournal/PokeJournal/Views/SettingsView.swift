@@ -9,12 +9,32 @@ import SwiftData
 enum SpriteStyle: String, CaseIterable {
     case official = "Offizielles Artwork"
     case pixel = "Pixel-Sprites"
+
+    func assetName(forPokemonID pokemonID: Int) -> String {
+        switch self {
+        case .official:
+            return "pokemon_\(pokemonID)"
+        case .pixel:
+            return "pixel_pokemon_\(pokemonID)"
+        }
+    }
 }
 
 enum AppTheme: String, CaseIterable {
     case system = "System"
     case light = "Hell"
     case dark = "Dunkel"
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system:
+            return nil
+        case .light:
+            return .light
+        case .dark:
+            return .dark
+        }
+    }
 }
 
 struct SettingsView: View {
