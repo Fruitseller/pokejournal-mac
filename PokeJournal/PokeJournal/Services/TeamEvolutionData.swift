@@ -7,7 +7,7 @@ import Foundation
 import SwiftUI
 
 struct PokemonTimeline: Identifiable {
-    let id = UUID()
+    let id: String
     let pokemonName: String
     let variant: String?
     let pokemonID: Int?
@@ -25,12 +25,12 @@ struct PokemonTimeline: Identifiable {
 
     /// A continuous segment where the Pokémon was present in the team.
     struct TimelineSegment: Identifiable {
-        let id = UUID()
+        let id: String
         let dataPoints: [DataPoint]
     }
 
     struct DataPoint: Identifiable {
-        let id = UUID()
+        let id: String
         let date: Date
         let level: Int
         let pokemonName: String?
@@ -83,7 +83,7 @@ enum TeamEvolutionDataBuilder {
         }
 
         // Build timelines
-        return pokemonData.map { (_, data) in
+        return pokemonData.map { (key, data) in
             let pokemon = db.find(byName: data.latestPokemonName)
             let typeColor = pokemon.map { PokemonTypeColor.color(for: $0.primaryType) } ?? .gray
 
@@ -93,6 +93,7 @@ enum TeamEvolutionDataBuilder {
             )
 
             return PokemonTimeline(
+                id: key,
                 pokemonName: data.latestPokemonName,
                 variant: data.variant,
                 pokemonID: data.latestPokemonID,
@@ -136,6 +137,7 @@ enum TeamEvolutionDataBuilder {
 
         for (i, appearance) in appearances.enumerated() {
             let point = PokemonTimeline.DataPoint(
+                id: dataPointID(for: appearance),
                 date: appearance.date,
                 level: appearance.level,
                 pokemonName: appearance.pokemonName,
@@ -148,7 +150,12 @@ enum TeamEvolutionDataBuilder {
 
                 // Gap > 1 means the Pokémon was absent for at least one session
                 if gap > 1 {
-                    segments.append(PokemonTimeline.TimelineSegment(dataPoints: currentPoints))
+                    segments.append(
+                        PokemonTimeline.TimelineSegment(
+                            id: segmentID(for: currentPoints, index: segments.count),
+                            dataPoints: currentPoints
+                        )
+                    )
                     currentPoints = []
                 }
             }
@@ -157,9 +164,29 @@ enum TeamEvolutionDataBuilder {
         }
 
         if !currentPoints.isEmpty {
-            segments.append(PokemonTimeline.TimelineSegment(dataPoints: currentPoints))
+            segments.append(
+                PokemonTimeline.TimelineSegment(
+                    id: segmentID(for: currentPoints, index: segments.count),
+                    dataPoints: currentPoints
+                )
+            )
         }
 
         return segments
+    }
+
+    private static func dataPointID(
+        for appearance: (date: Date, level: Int, sessionIndex: Int, pokemonName: String, pokemonID: Int?)
+    ) -> String {
+        let timestamp = Int(appearance.date.timeIntervalSince1970)
+        let pokemonID = appearance.pokemonID.map(String.init) ?? "unknown"
+        return "\(appearance.sessionIndex)|\(timestamp)|\(appearance.pokemonName)|\(pokemonID)|\(appearance.level)"
+    }
+
+    private static func segmentID(for points: [PokemonTimeline.DataPoint], index: Int) -> String {
+        guard let first = points.first, let last = points.last else {
+            return "segment-\(index)-empty"
+        }
+        return "segment-\(index)-\(first.id)-\(last.id)"
     }
 }

@@ -71,9 +71,16 @@ struct HeatmapView: View {
             }
         }
         .padding()
-        .onAppear {
+        .task(id: contentSignature) {
             grid = HeatmapDataBuilder.buildGrid(from: game)
+            hoveredCell = nil
+            popoverCell = nil
+            showPopover = false
         }
+    }
+
+    private var contentSignature: GameContentSignature {
+        GameContentSignatureBuilder.build(from: game)
     }
 
     // MARK: - Canvas Grid

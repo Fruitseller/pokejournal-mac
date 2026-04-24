@@ -9,48 +9,67 @@ import Charts
 struct TeamEvolutionView: View {
     let game: Game
 
-    private var timelines: [PokemonTimeline] {
-        TeamEvolutionDataBuilder.buildTimelines(from: game)
-    }
-
+    @State private var timelines: [PokemonTimeline] = []
     @State private var hiddenPokemon: Set<String> = []
     @State private var highlightedPokemon: String?
     @State private var pinnedPokemon: String?
+    @State private var isLoading = true
 
     var body: some View {
-        if timelines.isEmpty {
-            ContentUnavailableView(
-                "Keine Team-Daten",
-                systemImage: "chart.line.uptrend.xyaxis",
-                description: Text("Sessions mit Team-Daten werden hier als Level-Verlauf angezeigt.")
-            )
-        } else {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Team-Entwicklung")
-                    .font(.headline)
-
-                TeamEvolutionChart(
-                    timelines: timelines,
-                    hiddenPokemon: hiddenPokemon,
-                    highlightedPokemon: $highlightedPokemon,
-                    pinnedPokemon: $pinnedPokemon
+        Group {
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else if timelines.isEmpty {
+                ContentUnavailableView(
+                    "Keine Team-Daten",
+                    systemImage: "chart.line.uptrend.xyaxis",
+                    description: Text("Sessions mit Team-Daten werden hier als Level-Verlauf angezeigt.")
                 )
+            } else {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Team-Entwicklung")
+                        .font(.headline)
 
-                FilterBar(
-                    timelines: timelines,
-                    currentTeamNames: Set(game.currentTeam.map(\.displayName)),
-                    hiddenPokemon: $hiddenPokemon
-                )
+                    TeamEvolutionChart(
+                        timelines: timelines,
+                        hiddenPokemon: hiddenPokemon,
+                        highlightedPokemon: $highlightedPokemon,
+                        pinnedPokemon: $pinnedPokemon
+                    )
 
-                LegendView(
-                    timelines: timelines,
-                    hiddenPokemon: $hiddenPokemon,
-                    highlightedPokemon: $highlightedPokemon,
-                    pinnedPokemon: $pinnedPokemon
-                )
+                    FilterBar(
+                        timelines: timelines,
+                        currentTeamNames: Set(game.currentTeam.map(\.displayName)),
+                        hiddenPokemon: $hiddenPokemon
+                    )
+
+                    LegendView(
+                        timelines: timelines,
+                        hiddenPokemon: $hiddenPokemon,
+                        highlightedPokemon: $highlightedPokemon,
+                        pinnedPokemon: $pinnedPokemon
+                    )
+                }
+                .padding()
             }
-            .padding()
         }
+        .task(id: contentSignature) {
+            isLoading = true
+            timelines = []
+            hiddenPokemon.removeAll()
+            highlightedPokemon = nil
+            pinnedPokemon = nil
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            guard !Task.isCancelled else { return }
+            timelines = TeamEvolutionDataBuilder.buildTimelines(from: game)
+            isLoading = false
+        }
+    }
+
+    private var contentSignature: GameContentSignature {
+        GameContentSignatureBuilder.build(from: game)
     }
 }
 

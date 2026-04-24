@@ -102,6 +102,19 @@ struct TeamEvolutionSegmentTests {
         #expect(segments[0].dataPoints[1].pokemonName == "Glutexo")
     }
 
+    @Test func buildSegments_usesStableIDs() {
+        let appearances = [
+            appearance("2025-01-01", level: 10, index: 0, name: "Glumanda"),
+            appearance("2025-01-03", level: 20, index: 2, name: "Glumanda"),
+        ]
+
+        let first = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 3)
+        let second = TeamEvolutionDataBuilder.buildSegments(from: appearances, totalSessionCount: 3)
+
+        #expect(first.map(\.id) == second.map(\.id))
+        #expect(first.flatMap(\.dataPoints).map(\.id) == second.flatMap(\.dataPoints).map(\.id))
+    }
+
     private func date(_ str: String) -> Date {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
@@ -184,6 +197,30 @@ struct TeamEvolutionPipelineTests {
             #expect(timeline.segments.count == 1)
             #expect(timeline.segments[0].dataPoints.count == 1)
         }
+    }
+
+    @Test func buildTimelines_usesStableIDsForSameGameData() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let game = Game(name: "Test", filePath: "/test.md")
+        context.insert(game)
+
+        let session = Session(date: date("2025-01-01"), activities: "Battle")
+        session.game = game
+        context.insert(session)
+
+        let member = TeamMember(pokemonName: "Glurak", level: 50)
+        member.session = session
+        context.insert(member)
+        try context.save()
+
+        let first = TeamEvolutionDataBuilder.buildTimelines(from: game)
+        let second = TeamEvolutionDataBuilder.buildTimelines(from: game)
+
+        #expect(first.map(\.id) == second.map(\.id))
+        #expect(first.flatMap(\.segments).map(\.id) == second.flatMap(\.segments).map(\.id))
+        #expect(first.flatMap(\.segments).flatMap(\.dataPoints).map(\.id) == second.flatMap(\.segments).flatMap(\.dataPoints).map(\.id))
     }
 
     @Test func levelProgression_trackedOverSessions() throws {

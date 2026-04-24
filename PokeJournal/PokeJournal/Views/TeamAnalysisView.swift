@@ -8,26 +8,28 @@ import SwiftData
 
 struct TeamAnalysisView: View {
     let game: Game
-
-    private var pokemonUsage: [PokemonUsageEntry] {
-        TeamAnalysisDataBuilder.buildUsage(from: game)
-    }
+    @State private var pokemonUsage: [PokemonUsageEntry] = []
+    @State private var isLoading = true
 
     private var hallOfFame: [PokemonUsageEntry] {
         Array(pokemonUsage.prefix(6))
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            if !hallOfFame.isEmpty {
+        LazyVStack(alignment: .leading, spacing: 24) {
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else if !hallOfFame.isEmpty {
                 HallOfFameSection(pokemon: hallOfFame)
             }
 
-            if !pokemonUsage.isEmpty {
+            if !isLoading && !pokemonUsage.isEmpty {
                 UsageStatsSection(usage: pokemonUsage)
             }
 
-            if pokemonUsage.isEmpty {
+            if !isLoading && pokemonUsage.isEmpty {
                 Text("Keine Team-Daten vorhanden")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -35,6 +37,18 @@ struct TeamAnalysisView: View {
             }
         }
         .padding()
+        .task(id: contentSignature) {
+            isLoading = true
+            pokemonUsage = []
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            guard !Task.isCancelled else { return }
+            pokemonUsage = TeamAnalysisDataBuilder.buildUsage(from: game)
+            isLoading = false
+        }
+    }
+
+    private var contentSignature: GameContentSignature {
+        GameContentSignatureBuilder.build(from: game)
     }
 }
 

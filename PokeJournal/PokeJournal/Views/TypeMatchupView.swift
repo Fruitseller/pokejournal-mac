@@ -5,16 +5,9 @@
 
 import SwiftUI
 
-private struct RelatedTeamMember: Identifiable {
-    let id: String
-    let displayName: String
-    let pokemonName: String
-    let variant: String?
-}
-
 struct TypeMatchupView: View {
     let game: Game
-    @State private var cachedAnalyses: [TeamMemberAnalysis] = []
+    @State private var cachedData = TypeMatchupData.empty
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -22,7 +15,7 @@ struct TypeMatchupView: View {
                 Spacer()
                 generationBadge
             }
-            TeamCheckSection(analyses: cachedAnalyses)
+            TeamCheckSection(analyses: cachedData.analyses)
             Divider()
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 32) {
@@ -38,20 +31,16 @@ struct TypeMatchupView: View {
             }
         }
         .padding()
-        .onAppear(perform: recomputeAnalyses)
-        .onChange(of: currentTeamSignature) { _, _ in
-            recomputeAnalyses()
-        }
-        .onChange(of: game.generation) { _, _ in
+        .task(id: contentSignature) {
             recomputeAnalyses()
         }
     }
 
     private var defensiveSection: some View {
         DefensiveBucketList(
-            profile: defensiveProfile,
+            profile: cachedData.defensiveProfile,
             generation: game.generation,
-            affectedMembers: weakMembers(against:)
+            affectedMembers: { cachedData.weakMembersByAttacker[$0] ?? [] }
         )
     }
 
@@ -77,22 +66,19 @@ struct TypeMatchupView: View {
     // MARK: Analyses caching
 
     private func recomputeAnalyses() {
-        let members: [TeamCheckAnalyzer.Member] = game.currentTeam.enumerated().compactMap { index, member in
-            guard let types = PokemonDatabase.shared.resolvedTypes(
-                for: member.pokemonName,
-                variant: member.variant
-            ) else {
-                return nil
-            }
-            return .init(
-                name: member.displayName,
-                types: types,
+        let members = game.currentTeam.enumerated().map { index, member in
+            TypeMatchupTeamMember(
+                id: "team-\(index)-\(member.order)-\(member.displayName)",
+                displayName: member.displayName,
                 pokemonName: member.pokemonName,
-                variant: member.variant,
-                id: "team-\(index)-\(member.order)-\(member.displayName)"
+                variant: member.variant
             )
         }
-        cachedAnalyses = TeamCheckAnalyzer.analyze(team: members, generation: game.generation)
+        cachedData = TypeMatchupDataBuilder.build(
+            team: members,
+            generation: game.generation,
+            resolveTypes: PokemonDatabase.shared.resolvedTypes(for:variant:)
+        )
     }
 
     // MARK: Offensive grid (flat, generation-aware)
@@ -105,79 +91,23 @@ struct TypeMatchupView: View {
                 ForEach(game.generation.allTypes, id: \.self) { type in
                     OffensiveMatchupCell(
                         type: type,
-                        multiplier: offensiveProfile[type] ?? 1.0,
-                        relatedMembers: strongMembers(against: type)
+                        multiplier: cachedData.offensiveProfile[type] ?? 1.0,
+                        relatedMembers: cachedData.strongMembersByDefender[type] ?? []
                     )
                 }
             }
         }
     }
 
-    // MARK: Profiles & affected members
-
-    private var defensiveProfile: [String: Double] {
-        TypeChart.teamDefensiveProfile(team: teamTypes, generation: game.generation)
-    }
-
-    private var offensiveProfile: [String: Double] {
-        TypeChart.teamOffensiveProfile(team: teamTypes, generation: game.generation)
-    }
-
-    private var teamTypes: [[String]] {
-        game.currentTeam.compactMap { member in
-            PokemonDatabase.shared.resolvedTypes(for: member.pokemonName, variant: member.variant)
-        }
-    }
-
-    private var currentTeamSignature: [String] {
-        game.currentTeam.map { member in
-            "\(member.order)|\(member.pokemonName)|\(member.variant ?? "")"
-        }
-    }
-
-    private func weakMembers(against attacker: String) -> [String] {
-        game.currentTeam.compactMap { member in
-            guard let types = PokemonDatabase.shared.resolvedTypes(
-                for: member.pokemonName,
-                variant: member.variant
-            ) else {
-                return nil
-            }
-            let m = TypeChart.defensiveMultiplier(
-                attacker: attacker,
-                defenderTypes: types,
-                generation: game.generation
-            )
-            return m > 1.0 ? member.displayName : nil
-        }
-    }
-
-    private func strongMembers(against defender: String) -> [RelatedTeamMember] {
-        game.currentTeam.enumerated().compactMap { index, member in
-            guard let types = PokemonDatabase.shared.resolvedTypes(
-                for: member.pokemonName,
-                variant: member.variant
-            ) else {
-                return nil
-            }
-            let best = types.map {
-                TypeChart.effectiveness(attacker: $0, defender: defender, generation: game.generation)
-            }.max() ?? 1.0
-            guard best > 1.0 else { return nil }
-            return RelatedTeamMember(
-                id: "related-\(index)-\(member.order)-\(member.displayName)",
-                displayName: member.displayName,
-                pokemonName: member.pokemonName,
-                variant: member.variant
-            )
-        }
+    private var contentSignature: GameContentSignature {
+        GameContentSignatureBuilder.build(from: game)
     }
 }
 
 private struct OffensiveMatchupCell: View {
     let type: String
     let multiplier: Double
-    let relatedMembers: [RelatedTeamMember]
+    let relatedMembers: [TypeMatchupRelatedMember]
 
     @State private var hoverShowsPopover = false
 
