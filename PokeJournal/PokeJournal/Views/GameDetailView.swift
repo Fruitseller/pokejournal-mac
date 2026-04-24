@@ -11,10 +11,7 @@ struct GameDetailView: View {
     @SceneStorage("selectedTab") private var selectedTab = 0
 
     var body: some View {
-        ScrollView {
-            GameDetailContent(game: game, selectedTab: $selectedTab)
-        }
-        .scrollIndicators(.never)
+        GameDetailContent(game: game, selectedTab: $selectedTab)
         .navigationTitle(game.displayName)
         .focusedSceneValue(\.selectedTab, $selectedTab)
     }
@@ -27,14 +24,11 @@ struct GameDetailContent: View {
     @Binding var selectedTab: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            GameHeaderView(game: game)
-
-            StatsCardsView(game: game)
-
-            if !game.currentTeam.isEmpty {
-                CurrentTeamView(game: game)
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            CompactGameHeaderView(game: game)
+                .padding(.horizontal)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
 
             Picker("Ansicht", selection: $selectedTab) {
                 Text("Sessions").tag(0)
@@ -46,89 +40,125 @@ struct GameDetailContent: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
+            .padding(.bottom, 12)
 
-            switch selectedTab {
-            case 0:
-                SessionsListView(game: game)
-            case 1:
-                TimelineView(game: game)
-            case 2:
-                HeatmapView(game: game)
-            case 3:
-                TeamAnalysisView(game: game)
-            case 4:
-                TeamEvolutionView(game: game)
-            case 5:
-                TypeMatchupView(game: game)
-            default:
-                EmptyView()
+            Divider()
+
+            ScrollView {
+                switch selectedTab {
+                case 0:
+                    SessionsListView(game: game)
+                case 1:
+                    TimelineView(game: game)
+                case 2:
+                    HeatmapView(game: game)
+                case 3:
+                    TeamAnalysisView(game: game)
+                case 4:
+                    TeamEvolutionView(game: game)
+                case 5:
+                    TypeMatchupView(game: game)
+                default:
+                    EmptyView()
+                }
             }
+            .scrollIndicators(.never)
         }
-        .padding()
     }
 }
 
-struct GameHeaderView: View {
+struct CompactGameHeaderView: View {
     let game: Game
 
     var body: some View {
+        HStack(alignment: .center, spacing: 24) {
+            titleAndFacts
+                .frame(minWidth: 260, maxWidth: .infinity, alignment: .leading)
+
+            currentTeam
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var titleAndFacts: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(game.displayName)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(game.displayName)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
+                HStack(spacing: 6) {
                     if let release = game.releaseDate {
-                        Text("Release: \(release)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        Text(release)
                     }
-
                     if let developer = game.developer {
                         Text(developer)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
                     }
                 }
-
-                Spacer()
-
-                if let metacritic = game.metacriticScore {
-                    MetacriticBadge(score: metacritic)
-                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
             }
 
-            if !game.platforms.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(game.platforms, id: \.self) { platform in
-                        PlatformBadge(platform: platform)
-                    }
+            HStack(spacing: 6) {
+                GameInfoPill(systemImage: "calendar", text: "\(game.totalSessionCount)")
+                GameInfoPill(systemImage: "person.3", text: "\(game.currentTeam.count)")
+                if let lastPlayed = game.lastPlayedDate {
+                    GameInfoPill(
+                        systemImage: "clock",
+                        text: lastPlayed.formatted(date: .abbreviated, time: .omitted)
+                    )
+                }
+                if let metacritic = game.metacriticScore {
+                    GameInfoPill(text: "\(metacritic)", tint: metacriticColor(score: metacritic))
+                }
+                ForEach(game.platforms.prefix(2), id: \.self) { platform in
+                    PlatformBadge(platform: platform)
                 }
             }
         }
-        .padding()
     }
-}
 
-struct MetacriticBadge: View {
-    let score: Int
+    @ViewBuilder
+    private var currentTeam: some View {
+        if !game.currentTeam.isEmpty {
+            CompactCurrentTeamView(team: game.currentTeam)
+        }
+    }
 
-    var color: Color {
+    private func metacriticColor(score: Int) -> Color {
         switch score {
         case 75...: return .green
         case 50..<75: return .yellow
         default: return .red
         }
     }
+}
+
+struct GameInfoPill: View {
+    var systemImage: String?
+    let text: String
+    var tint: Color?
 
     var body: some View {
-        Text("\(score)")
-            .font(.title2)
-            .fontWeight(.bold)
-            .foregroundStyle(.primary)
-            .frame(width: 50, height: 50)
-            .background(color.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
+        HStack(spacing: 4) {
+            if let systemImage {
+                Image(systemName: systemImage)
+            }
+            Text(text)
+                .lineLimit(1)
+        }
+        .font(.caption)
+        .fontWeight(tint == nil ? .regular : .semibold)
+        .foregroundStyle(tint ?? .secondary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background((tint ?? Color.secondary).opacity(tint == nil ? 0.08 : 0.16), in: Capsule())
     }
 }
 
@@ -138,104 +168,43 @@ struct PlatformBadge: View {
     var body: some View {
         Text(platform)
             .font(.caption)
+            .lineLimit(1)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.quaternary, in: Capsule())
     }
 }
 
-struct StatsCardsView: View {
-    let game: Game
+struct CompactCurrentTeamView: View {
+    let team: [TeamMember]
 
     var body: some View {
-        HStack(spacing: 16) {
-            StatCard(
-                title: "Sessions",
-                value: "\(game.totalSessionCount)",
-                icon: "calendar"
-            )
-
-            StatCard(
-                title: "Team-Größe",
-                value: "\(game.currentTeam.count)",
-                icon: "person.3"
-            )
-
-            if let lastPlayed = game.lastPlayedDate {
-                StatCard(
-                    title: "Zuletzt gespielt",
-                    value: lastPlayed.formatted(date: .abbreviated, time: .omitted),
-                    icon: "clock"
-                )
-            }
-        }
-    }
-}
-
-struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(.secondary)
-
-            Text(value)
-                .font(.title)
-                .fontWeight(.semibold)
-
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-struct CurrentTeamView: View {
-    let game: Game
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Aktuelles Team")
-                .font(.headline)
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
 
-            LazyVGrid(columns: [
-                GridItem(.adaptive(minimum: 100, maximum: 150), spacing: 12)
-            ], spacing: 12) {
-                ForEach(game.currentTeam, id: \.pokemonName) { member in
-                    TeamMemberCard(member: member)
+            HStack(spacing: 10) {
+                ForEach(team.prefix(6), id: \.pokemonName) { member in
+                    VStack(spacing: 2) {
+                        PokemonSpriteView(pokemonName: member.pokemonName, variant: member.variant, size: 54)
+                        Text("\(member.level)")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(width: 62)
+                    .help("\(member.displayName), Level \(member.level)")
                 }
             }
         }
-        .padding()
-    }
-}
-
-struct TeamMemberCard: View {
-    let member: TeamMember
-
-    var body: some View {
-        VStack(spacing: 8) {
-            PokemonSpriteView(pokemonName: member.pokemonName, variant: member.variant, size: 64)
-
-            Text(member.displayName)
-                .font(.caption)
-                .fontWeight(.medium)
-                .lineLimit(1)
-
-            Text("Lvl \(member.level)")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+        .padding(.leading, 18)
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(.separator.opacity(0.35))
+                .frame(width: 1)
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
