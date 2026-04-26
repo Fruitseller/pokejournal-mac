@@ -38,7 +38,7 @@ The reviewer should evaluate code changes and SwiftUI previews directly.
 - `Views/GameListView` → Sidebar game list
 - `Views/GameDetailView` → Detail pane with 6 tabs: Sessions, Timeline, Heatmap, Hall of Fame, Team Evolution, Team-Check
 - `Views/SessionDetailView` → Session detail (navigated from session list)
-- `Views/SettingsView` → Modal sheet from toolbar
+- `Views/SettingsView` → Standard macOS Settings scene (⌘,)
 - `Views/VaultSetupView` → First-run vault selection
 
 ## Visual Standards

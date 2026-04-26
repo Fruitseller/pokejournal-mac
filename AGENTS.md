@@ -78,7 +78,6 @@ On failures: Analyze output → fix tests/code → re-run.
 - **VaultManager.swift** - Vault access with NSOpenPanel and security-scoped bookmarks
 - **DataLoader.swift** - Async data pipeline, scans configured Pokemon folder in vault
 - **MarkdownParser.swift** - YAML and markdown parsing, bilingual (German/English)
-- **FileWatcher.swift** - GCD-based file system monitoring for auto-reload
 
 ### Data Models (`Models/`)
 - **Game** → Sessions (1:n) + OldSessions (1:n), with cascade delete

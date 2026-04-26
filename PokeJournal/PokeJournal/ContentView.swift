@@ -11,7 +11,6 @@ struct ContentView: View {
     @Query private var games: [Game]
 
     @State private var selectedGame: Game?
-    @State private var showSettings = false
     @State private var dataLoader = DataLoader()
 
     // Persists the selected game across app launches (per window scene)
@@ -56,20 +55,6 @@ struct ContentView: View {
     private var mainContent: some View {
         NavigationSplitView {
             GameListView(selectedGame: $selectedGame)
-                .toolbar {
-                    ToolbarItem(placement: .automatic) {
-                        Button(action: { showSettings = true }) {
-                            Label("Einstellungen", systemImage: "gear")
-                        }
-                    }
-
-                    ToolbarItem(placement: .automatic) {
-                        Button(action: reload) {
-                            Label("Aktualisieren", systemImage: "arrow.clockwise")
-                        }
-                        .disabled(dataLoader.isLoading)
-                    }
-                }
         } detail: {
             NavigationStack {
                 if let game = selectedGame {
@@ -85,19 +70,6 @@ struct ContentView: View {
         }
         .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 350)
         .focusedSceneValue(\.reloadAction, reload)
-        .sheet(isPresented: $showSettings) {
-            NavigationStack {
-                SettingsView()
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Fertig") {
-                                showSettings = false
-                            }
-                        }
-                    }
-            }
-            .frame(minWidth: 500, minHeight: 400)
-        }
         .overlay {
             if dataLoader.isLoading {
                 ProgressView("Lade Daten...")
