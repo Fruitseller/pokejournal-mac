@@ -32,25 +32,21 @@ struct PokemonSpriteView: View {
     }
 
     var body: some View {
-        Group {
-            if let assetName = assetName,
-               let nsImage = NSImage(named: assetName) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-                    .accessibilityLabel(accessibilityText)
-            } else if let fallbackAssetName,
-                      let nsImage = NSImage(named: fallbackAssetName) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-                    .accessibilityLabel(accessibilityText)
-            } else {
-                fallbackImage
-            }
+        if let assetName, let nsImage = NSImage(named: assetName) {
+            spriteImage(nsImage)
+        } else if let fallbackAssetName, let nsImage = NSImage(named: fallbackAssetName) {
+            spriteImage(nsImage)
+        } else {
+            fallbackImage
         }
+    }
+
+    private func spriteImage(_ image: NSImage) -> some View {
+        Image(nsImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+            .accessibilityLabel(accessibilityText)
     }
 
     private var fallbackImage: some View {

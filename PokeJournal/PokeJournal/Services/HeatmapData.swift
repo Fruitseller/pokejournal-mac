@@ -59,10 +59,10 @@ enum HeatmapDataBuilder {
         let textLengths = dayMap.values.map(\.textLength).sorted()
         let thresholds = calculateThresholds(from: textLengths)
 
-        // Determine date range
-        let allDates = Array(dayMap.keys)
-        let minDate = allDates.min()!
-        let maxDate = allDates.max()!
+        guard let minDate = dayMap.keys.min(),
+              let maxDate = dayMap.keys.max() else {
+            return HeatmapGrid(weeks: [], monthLabels: [])
+        }
 
         // Extend to full weeks (Mon-Sun)
         let gridStart = mondayOfWeek(for: minDate, calendar: calendar)
@@ -112,7 +112,8 @@ enum HeatmapDataBuilder {
                 weekDays = []
             }
 
-            date = calendar.date(byAdding: .day, value: 1, to: date)!
+            guard let next = calendar.date(byAdding: .day, value: 1, to: date) else { break }
+            date = next
         }
 
         return HeatmapGrid(weeks: weeks, monthLabels: monthLabels)
@@ -149,12 +150,12 @@ enum HeatmapDataBuilder {
     static func mondayOfWeek(for date: Date, calendar: Calendar) -> Date {
         let day = calendar.startOfDay(for: date)
         let idx = weekdayIndex(for: day, calendar: calendar)
-        return calendar.date(byAdding: .day, value: -idx, to: day)!
+        return calendar.date(byAdding: .day, value: -idx, to: day) ?? day
     }
 
     static func sundayOfWeek(for date: Date, calendar: Calendar) -> Date {
         let day = calendar.startOfDay(for: date)
         let idx = weekdayIndex(for: day, calendar: calendar)
-        return calendar.date(byAdding: .day, value: 6 - idx, to: day)!
+        return calendar.date(byAdding: .day, value: 6 - idx, to: day) ?? day
     }
 }

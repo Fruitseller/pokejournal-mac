@@ -12,8 +12,6 @@ struct ContentView: View {
 
     @State private var selectedGame: Game?
     @State private var dataLoader = DataLoader()
-
-    // Persists the selected game across app launches (per window scene)
     @SceneStorage("selectedGameName") private var selectedGameName: String?
 
     private var vaultManager = VaultManager.shared
@@ -34,16 +32,12 @@ struct ContentView: View {
         .onChange(of: vaultManager.vaultURL) { _, newValue in
             if newValue != nil {
                 selectedGame = nil
-                Task {
-                    await dataLoader.reloadData(context: modelContext)
-                }
+                Task { await dataLoader.reloadData(context: modelContext) }
             }
         }
-        // Persist selection
         .onChange(of: selectedGame) { _, game in
             selectedGameName = game?.name
         }
-        // Restore selection once games are loaded
         .onChange(of: games) { _, newGames in
             if selectedGame == nil, let name = selectedGameName {
                 selectedGame = newGames.first { $0.name == name }
