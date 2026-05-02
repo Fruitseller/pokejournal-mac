@@ -293,6 +293,38 @@ struct TeamDiffEvolutionTests {
         #expect(diff.removed.isEmpty) // Glumanda not "removed" — it evolved
         #expect(diff.levelChanges.count == 1) // Pikachu level change
     }
+
+    @Test func teamDiff_matchKey_isCaseInsensitive() throws {
+        // Pins the contract: TeamMember.matchKey lowercases pokemonName, so case-only
+        // differences across previous/current must NOT produce add/remove churn.
+        let container = try makeContainer()
+        let context = container.mainContext
+        let game = Game(name: "Test", filePath: "/test.md")
+        context.insert(game)
+
+        let s1 = Session(date: Date(), activities: "A")
+        s1.game = game
+        context.insert(s1)
+        let prev = TeamMember(pokemonName: "PIKACHU", level: 10)
+        prev.session = s1
+        context.insert(prev)
+
+        let s2 = Session(date: Date(), activities: "B")
+        s2.game = game
+        context.insert(s2)
+        let current = TeamMember(pokemonName: "Pikachu", level: 12)
+        current.session = s2
+        context.insert(current)
+        try context.save()
+
+        let diff = teamDiff(current: [current], previous: [prev])
+
+        #expect(diff.added.isEmpty)
+        #expect(diff.removed.isEmpty)
+        #expect(diff.evolutions.isEmpty)
+        #expect(diff.levelChanges.count == 1)
+        #expect(diff.levelChanges[0].delta == 2)
+    }
 }
 
 // MARK: - Merged Evolution Timelines Tests

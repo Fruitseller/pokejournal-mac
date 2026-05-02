@@ -31,4 +31,9 @@ final class TeamMember {
         }
         return pokemonName
     }
+
+    /// Lowercased name used as a key for evolution / diff matching.
+    var matchKey: String {
+        pokemonName.lowercased()
+    }
 }

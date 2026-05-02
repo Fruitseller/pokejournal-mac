@@ -69,16 +69,34 @@ struct SessionDetailView: View {
             Spacer()
 
             if let filePath = session.filePath {
-                Button("In Obsidian öffnen") {
-                    openInObsidian(filePath: filePath)
-                }
-                .buttonStyle(.bordered)
+                OpenInObsidianButton(filePath: filePath, style: .bordered)
             }
         }
         .padding()
     }
+}
 
-    private func openInObsidian(filePath: String) {
+/// Opens the given file in Obsidian via URL scheme. No-op if the vault isn't configured.
+struct OpenInObsidianButton: View {
+    enum Style { case bordered, link }
+
+    let filePath: String
+    var style: Style = .link
+
+    var body: some View {
+        switch style {
+        case .bordered:
+            Button("In Obsidian öffnen", action: open)
+                .buttonStyle(.bordered)
+        case .link:
+            Button(action: open) {
+                Label("In Obsidian öffnen", systemImage: "arrow.up.forward.app")
+            }
+            .buttonStyle(.link)
+        }
+    }
+
+    private func open() {
         if let url = VaultManager.shared.obsidianURL(forFilePath: filePath) {
             NSWorkspace.shared.open(url)
         }
@@ -92,19 +110,19 @@ struct TeamSectionView: View {
     let diff: TeamDiff?
 
     private var addedNames: Set<String> {
-        Set(diff?.added.map { $0.pokemonName.lowercased() } ?? [])
+        Set(diff?.added.map(\.matchKey) ?? [])
     }
 
     private var evolvedNames: [String: TeamDiff.Evolution] {
         Dictionary(
-            (diff?.evolutions ?? []).map { ($0.to.pokemonName.lowercased(), $0) },
+            (diff?.evolutions ?? []).map { ($0.to.matchKey, $0) },
             uniquingKeysWith: { first, _ in first }
         )
     }
 
     private var levelDeltas: [String: Int] {
         Dictionary(
-            (diff?.levelChanges ?? []).map { ($0.member.pokemonName.lowercased(), $0.delta) },
+            (diff?.levelChanges ?? []).map { ($0.member.matchKey, $0.delta) },
             uniquingKeysWith: { first, _ in first }
         )
     }
@@ -128,7 +146,7 @@ struct TeamSectionView: View {
             ], spacing: 12) {
                 // Current team with inline annotations
                 ForEach(team, id: \.pokemonName) { member in
-                    let key = member.pokemonName.lowercased()
+                    let key = member.matchKey
                     let isNew = addedNames.contains(key)
                     let evolution = evolvedNames[key]
                     let delta = levelDeltas[key]

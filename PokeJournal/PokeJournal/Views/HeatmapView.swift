@@ -255,14 +255,7 @@ struct HeatmapPopoverView: View {
 
             if let filePath = day.filePath, !filePath.isEmpty {
                 Divider()
-                Button {
-                    if let url = VaultManager.shared.obsidianURL(forFilePath: filePath) {
-                        NSWorkspace.shared.open(url)
-                    }
-                } label: {
-                    Label("In Obsidian öffnen", systemImage: "arrow.up.forward.app")
-                }
-                .buttonStyle(.link)
+                OpenInObsidianButton(filePath: filePath)
             }
         }
         .padding()

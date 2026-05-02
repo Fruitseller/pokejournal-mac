@@ -33,16 +33,16 @@ struct TeamDiff {
 
 func teamDiff(current: [TeamMember], previous: [TeamMember]) -> TeamDiff {
     let currentByName = Dictionary(
-        current.map { ($0.pokemonName.lowercased(), $0) },
+        current.map { ($0.matchKey, $0) },
         uniquingKeysWith: { first, _ in first }
     )
     let previousByName = Dictionary(
-        previous.map { ($0.pokemonName.lowercased(), $0) },
+        previous.map { ($0.matchKey, $0) },
         uniquingKeysWith: { first, _ in first }
     )
 
-    var added = current.filter { previousByName[$0.pokemonName.lowercased()] == nil }
-    var removed = previous.filter { currentByName[$0.pokemonName.lowercased()] == nil }
+    var added = current.filter { previousByName[$0.matchKey] == nil }
+    var removed = previous.filter { currentByName[$0.matchKey] == nil }
 
     let db = PokemonDatabase.shared
     var evolutions: [TeamDiff.Evolution] = []
@@ -51,26 +51,26 @@ func teamDiff(current: [TeamMember], previous: [TeamMember]) -> TeamDiff {
 
     for addedMember in added {
         for removedMember in removed {
-            if matchedRemoved.contains(removedMember.pokemonName.lowercased()) { continue }
+            if matchedRemoved.contains(removedMember.matchKey) { continue }
             if db.sameEvolutionLine(addedMember.pokemonName, removedMember.pokemonName) {
                 evolutions.append(.init(
                     from: removedMember,
                     to: addedMember,
                     levelDelta: addedMember.level - removedMember.level
                 ))
-                matchedAdded.insert(addedMember.pokemonName.lowercased())
-                matchedRemoved.insert(removedMember.pokemonName.lowercased())
+                matchedAdded.insert(addedMember.matchKey)
+                matchedRemoved.insert(removedMember.matchKey)
                 break
             }
         }
     }
 
-    added.removeAll { matchedAdded.contains($0.pokemonName.lowercased()) }
-    removed.removeAll { matchedRemoved.contains($0.pokemonName.lowercased()) }
+    added.removeAll { matchedAdded.contains($0.matchKey) }
+    removed.removeAll { matchedRemoved.contains($0.matchKey) }
 
     var levelChanges: [TeamDiff.LevelChange] = []
     for member in current {
-        if let prev = previousByName[member.pokemonName.lowercased()] {
+        if let prev = previousByName[member.matchKey] {
             let delta = member.level - prev.level
             if delta != 0 {
                 levelChanges.append(.init(member: member, delta: delta))
