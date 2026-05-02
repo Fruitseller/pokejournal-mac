@@ -6,6 +6,32 @@
 import SwiftUI
 import Charts
 
+/// A small Pokémon sprite that falls back to a colored circle when no sprite is available.
+/// Honors the user's `spriteStyle` setting and resolves variant-specific sprites correctly.
+private struct TimelineSprite: View {
+    let pokemonName: String
+    let variant: String?
+    let typeColor: Color
+    let size: CGFloat
+    let fallbackSize: CGFloat
+    @AppStorage("spriteStyle") private var spriteStyle: SpriteStyle = .official
+
+    var body: some View {
+        if let assetName = PokemonDatabase.shared.spriteAssetName(
+            for: pokemonName, variant: variant, style: spriteStyle
+        ), let nsImage = NSImage(named: assetName) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+        } else {
+            Circle()
+                .fill(typeColor)
+                .frame(width: fallbackSize, height: fallbackSize)
+        }
+    }
+}
+
 struct TeamEvolutionView: View {
     let game: Game
 
@@ -140,8 +166,10 @@ struct TeamEvolutionChart: View {
 
     struct HoveredDataPoint {
         let pokemonName: String
+        let variant: String?
         let pokemonID: Int?
         let timelineName: String
+        let displayName: String
         let typeColor: Color
         let level: Int
         let date: Date
@@ -157,6 +185,7 @@ struct TeamEvolutionChart: View {
                     Image(systemName: "minus.magnifyingglass")
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Auszoomen")
                 .disabled(zoomLevel <= minZoom)
 
                 Text("\(Int(zoomLevel * 100))%")
@@ -168,12 +197,14 @@ struct TeamEvolutionChart: View {
                     Image(systemName: "plus.magnifyingglass")
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Einzoomen")
                 .disabled(zoomLevel >= maxZoom)
 
                 Button(action: { setZoom(1.0) }) {
                     Image(systemName: "arrow.counterclockwise")
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Zoom zurücksetzen")
                 .disabled(zoomLevel == 1.0)
             }
 
@@ -307,8 +338,12 @@ struct TeamEvolutionChart: View {
 
     @ViewBuilder
     private func spriteAnnotations(proxy: ChartProxy, geo: GeometryProxy) -> some View {
-        let plotFrame = geo[proxy.plotFrame!]
+        if let plotFrameAnchor = proxy.plotFrame {
+            spriteAnnotationsContent(proxy: proxy, plotFrame: geo[plotFrameAnchor])
+        }
+    }
 
+    private func spriteAnnotationsContent(proxy: ChartProxy, plotFrame: CGRect) -> some View {
         ForEach(visibleTimelines) { timeline in
             if let lastSegment = timeline.segments.last,
                let lastPoint = lastSegment.dataPoints.last,
@@ -318,19 +353,13 @@ struct TeamEvolutionChart: View {
                 let screenY = plotFrame.origin.y + yPos
                 let spriteOpacity = opacity(for: timeline)
 
-                Group {
-                    if let pokemonID = timeline.pokemonID,
-                       let nsImage = NSImage(named: "pokemon_\(pokemonID)") {
-                        Image(nsImage: nsImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
-                    } else {
-                        Circle()
-                            .fill(timeline.typeColor)
-                            .frame(width: 8, height: 8)
-                    }
-                }
+                TimelineSprite(
+                    pokemonName: timeline.pokemonName,
+                    variant: timeline.variant,
+                    typeColor: timeline.typeColor,
+                    size: 20,
+                    fallbackSize: 8
+                )
                 .opacity(spriteOpacity)
                 .position(x: screenX + 14, y: screenY)
                 .allowsHitTesting(false)
@@ -348,20 +377,16 @@ struct TeamEvolutionChart: View {
         let y = max(hp.location.y - tooltipHeight - 8, 0)
 
         HStack(spacing: 8) {
-            if let pokemonID = hp.pokemonID,
-               let nsImage = NSImage(named: "pokemon_\(pokemonID)") {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 32, height: 32)
-            } else {
-                Circle()
-                    .fill(hp.typeColor)
-                    .frame(width: 12, height: 12)
-            }
+            TimelineSprite(
+                pokemonName: hp.pokemonName,
+                variant: hp.variant,
+                typeColor: hp.typeColor,
+                size: 32,
+                fallbackSize: 12
+            )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(hp.pokemonName)
+                Text(hp.displayName)
                     .font(.caption)
                     .fontWeight(.semibold)
                 Text("Lvl \(hp.level)")
@@ -386,7 +411,8 @@ struct TeamEvolutionChart: View {
         proxy: ChartProxy,
         geo: GeometryProxy
     ) -> HoveredDataPoint? {
-        let plotFrame = geo[proxy.plotFrame!]
+        guard let plotFrameAnchor = proxy.plotFrame else { return nil }
+        let plotFrame = geo[plotFrameAnchor]
 
         guard plotFrame.contains(location) else { return nil }
 
@@ -411,9 +437,11 @@ struct TeamEvolutionChart: View {
                     if dist < closestDistance && dist < maxHitDistance {
                         closestDistance = dist
                         closest = HoveredDataPoint(
-                            pokemonName: point.pokemonName ?? timeline.displayName,
+                            pokemonName: point.pokemonName ?? timeline.pokemonName,
+                            variant: timeline.variant,
                             pokemonID: point.pokemonID ?? timeline.pokemonID,
                             timelineName: timeline.displayName,
+                            displayName: point.pokemonName ?? timeline.displayName,
                             typeColor: timeline.typeColor,
                             level: point.level,
                             date: point.date,
@@ -455,9 +483,11 @@ struct TeamEvolutionChart: View {
                 if dist < closestYDist && dist < 20 {
                     closestYDist = dist
                     closest = HoveredDataPoint(
-                        pokemonName: timeline.displayName,
+                        pokemonName: timeline.pokemonName,
+                        variant: timeline.variant,
                         pokemonID: timeline.pokemonID,
                         timelineName: timeline.displayName,
+                        displayName: timeline.displayName,
                         typeColor: timeline.typeColor,
                         level: Int(interpolatedLevel),
                         date: date,
@@ -522,55 +552,59 @@ struct LegendView: View {
     }
 
     private func legendItem(for timeline: PokemonTimeline, isHidden: Bool, isPinned: Bool, isDimmed: Bool) -> some View {
-        HStack(spacing: 4) {
-            if let pokemonID = timeline.pokemonID,
-               let nsImage = NSImage(named: "pokemon_\(pokemonID)") {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 18, height: 18)
-            } else {
-                Circle()
-                    .fill(timeline.typeColor)
-                    .frame(width: 8, height: 8)
-            }
-
-            Text(timeline.displayName)
-                .font(.caption2)
-
-            if isPinned {
-                Image(systemName: "pin.fill")
-                    .font(.system(size: 8))
-                    .foregroundStyle(timeline.typeColor)
-            }
-        }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(
-            isHidden ? .clear : timeline.typeColor.opacity(isPinned ? 0.3 : 0.15),
-            in: RoundedRectangle(cornerRadius: 6)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(
-                    isHidden ? Color.gray.opacity(0.2) : timeline.typeColor.opacity(isPinned ? 0.8 : 0.4),
-                    lineWidth: isPinned ? 2 : 1
+        Button {
+            toggleVisibility(of: timeline, isHidden: isHidden)
+        } label: {
+            HStack(spacing: 4) {
+                TimelineSprite(
+                    pokemonName: timeline.pokemonName,
+                    variant: timeline.variant,
+                    typeColor: timeline.typeColor,
+                    size: 18,
+                    fallbackSize: 8
                 )
-        )
-        .opacity(isHidden ? 0.4 : (isDimmed ? 0.4 : 1.0))
-        .onTapGesture(count: 1) {
-            if isHidden {
-                hiddenPokemon.remove(timeline.displayName)
-            } else {
-                hiddenPokemon.insert(timeline.displayName)
-                if pinnedPokemon == timeline.displayName {
-                    pinnedPokemon = nil
+
+                Text(timeline.displayName)
+                    .font(.caption2)
+
+                if isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(timeline.typeColor)
+                }
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                isHidden ? .clear : timeline.typeColor.opacity(isPinned ? 0.3 : 0.15),
+                in: RoundedRectangle(cornerRadius: 6)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        isHidden ? Color.gray.opacity(0.2) : timeline.typeColor.opacity(isPinned ? 0.8 : 0.4),
+                        lineWidth: isPinned ? 2 : 1
+                    )
+            )
+            .opacity(isHidden ? 0.4 : (isDimmed ? 0.4 : 1.0))
+            .onHover { hovering in
+                if !isHidden && pinnedPokemon == nil {
+                    highlightedPokemon = hovering ? timeline.displayName : nil
                 }
             }
         }
-        .onHover { hovering in
-            if !isHidden && pinnedPokemon == nil {
-                highlightedPokemon = hovering ? timeline.displayName : nil
+        .buttonStyle(.plain)
+        .accessibilityLabel(timeline.displayName)
+        .accessibilityValue(isHidden ? "ausgeblendet" : "sichtbar")
+    }
+
+    private func toggleVisibility(of timeline: PokemonTimeline, isHidden: Bool) {
+        if isHidden {
+            hiddenPokemon.remove(timeline.displayName)
+        } else {
+            hiddenPokemon.insert(timeline.displayName)
+            if pinnedPokemon == timeline.displayName {
+                pinnedPokemon = nil
             }
         }
     }
