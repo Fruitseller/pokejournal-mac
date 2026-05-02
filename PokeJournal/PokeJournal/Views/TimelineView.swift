@@ -100,10 +100,7 @@ enum TimelineDataBuilder {
 
 struct TimelineView: View {
     let game: Game
-
-    private var segments: [TimelineSegment] {
-        TimelineDataBuilder.buildSegments(from: game)
-    }
+    @State private var segments: [TimelineSegment] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -129,13 +126,11 @@ struct TimelineView: View {
                                 vaultName: VaultManager.shared.vaultName
                             )
 
-                            if let gapDays = segment.gapDaysAfter {
-                                let fromYear = TimelineDataBuilder.year(
-                                    of: segment.sessions.last!.date
-                                )
-                                let toYear = TimelineDataBuilder.year(
-                                    of: segments[index + 1].sessions.first!.date
-                                )
+                            if let gapDays = segment.gapDaysAfter,
+                               let fromDate = segment.sessions.last?.date,
+                               let toDate = segments[safe: index + 1]?.sessions.first?.date {
+                                let fromYear = TimelineDataBuilder.year(of: fromDate)
+                                let toYear = TimelineDataBuilder.year(of: toDate)
                                 TimelineGapView(
                                     days: gapDays,
                                     yearChange: fromYear != toYear ? toYear : nil
@@ -150,6 +145,19 @@ struct TimelineView: View {
             }
         }
         .padding()
+        .task(id: contentSignature) {
+            segments = TimelineDataBuilder.buildSegments(from: game)
+        }
+    }
+
+    private var contentSignature: GameContentSignature {
+        GameContentSignatureBuilder.build(from: game)
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
@@ -304,12 +312,16 @@ struct TimelineDotView: View {
             .frame(width: 12, height: 12)
             .scaleEffect(isHovered ? 1.4 : 1.0)
             .animation(.easeOut(duration: 0.15), value: isHovered)
+            .contentShape(Circle().scale(2))
             .onHover { hovering in
                 isHovered = hovering
             }
             .onTapGesture {
                 showPopover = true
             }
+            .accessibilityElement()
+            .accessibilityLabel(Self.tooltipFmt.string(from: session.date))
+            .accessibilityAddTraits(.isButton)
             .popover(isPresented: $showPopover, arrowEdge: .bottom) {
                 SessionPopoverView(
                     session: session,
@@ -356,15 +368,7 @@ struct SessionPopoverView: View {
 
             if let filePath = session.filePath, !filePath.isEmpty {
                 Divider()
-
-                Button {
-                    if let url = VaultManager.shared.obsidianURL(forFilePath: filePath) {
-                        NSWorkspace.shared.open(url)
-                    }
-                } label: {
-                    Label("In Obsidian öffnen", systemImage: "arrow.up.forward.app")
-                }
-                .buttonStyle(.link)
+                OpenInObsidianButton(filePath: filePath)
             }
         }
         .padding()
