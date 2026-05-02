@@ -5,21 +5,44 @@
 
 import SwiftUI
 
+// MARK: - Tabs
+
+enum AppTab: Int, CaseIterable, Identifiable {
+    case sessions, timeline, heatmap, hallOfFame, teamEvolution, teamCheck
+
+    var id: Int { rawValue }
+
+    var title: String {
+        switch self {
+        case .sessions:       return "Sessions"
+        case .timeline:       return "Timeline"
+        case .heatmap:        return "Heatmap"
+        case .hallOfFame:     return "Hall of Fame"
+        case .teamEvolution:  return "Team-Entwicklung"
+        case .teamCheck:      return "Team-Check"
+        }
+    }
+
+    /// The Cmd-N shortcut for jumping to this tab. Tabs are 1-indexed in the menu.
+    var shortcut: KeyEquivalent {
+        KeyEquivalent(Character(String(rawValue + 1)))
+    }
+}
+
 // MARK: - Focused Values
 
 extension FocusedValues {
-    @Entry var selectedTab: Binding<Int>? = nil
+    @Entry var selectedTab: Binding<AppTab>? = nil
     @Entry var reloadAction: (() -> Void)? = nil
 }
 
 // MARK: - Commands
 
 struct AppCommands: Commands {
-    @FocusedValue(\.selectedTab) var selectedTabBinding: Binding<Int>?
+    @FocusedValue(\.selectedTab) var selectedTabBinding: Binding<AppTab>?
     @FocusedValue(\.reloadAction) var reloadAction: (() -> Void)?
 
     var body: some Commands {
-        // Remove "New Window" from File menu — we handle it ourselves via context menu
         CommandGroup(replacing: .newItem) { }
 
         CommandMenu("Ansicht") {
@@ -29,29 +52,11 @@ struct AppCommands: Commands {
 
             Divider()
 
-            Button("Sessions") { selectedTabBinding?.wrappedValue = 0 }
-                .keyboardShortcut("1", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
-
-            Button("Timeline") { selectedTabBinding?.wrappedValue = 1 }
-                .keyboardShortcut("2", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
-
-            Button("Heatmap") { selectedTabBinding?.wrappedValue = 2 }
-                .keyboardShortcut("3", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
-
-            Button("Hall of Fame") { selectedTabBinding?.wrappedValue = 3 }
-                .keyboardShortcut("4", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
-
-            Button("Team-Entwicklung") { selectedTabBinding?.wrappedValue = 4 }
-                .keyboardShortcut("5", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
-
-            Button("Team-Check") { selectedTabBinding?.wrappedValue = 5 }
-                .keyboardShortcut("6", modifiers: .command)
-                .disabled(selectedTabBinding == nil)
+            ForEach(AppTab.allCases) { tab in
+                Button(tab.title) { selectedTabBinding?.wrappedValue = tab }
+                    .keyboardShortcut(tab.shortcut, modifiers: .command)
+                    .disabled(selectedTabBinding == nil)
+            }
         }
     }
 }

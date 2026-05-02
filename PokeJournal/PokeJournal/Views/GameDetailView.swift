@@ -8,7 +8,7 @@ import SwiftData
 
 struct GameDetailView: View {
     let game: Game
-    @SceneStorage("selectedTab") private var selectedTab = 0
+    @SceneStorage("selectedTab") private var selectedTab: AppTab = .sessions
 
     var body: some View {
         GameDetailContent(game: game, selectedTab: $selectedTab)
@@ -21,7 +21,7 @@ struct GameDetailView: View {
 /// Shared content used by both the split-view detail pane and standalone game windows.
 struct GameDetailContent: View {
     let game: Game
-    @Binding var selectedTab: Int
+    @Binding var selectedTab: AppTab
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -31,12 +31,9 @@ struct GameDetailContent: View {
                 .padding(.bottom, 8)
 
             Picker("Ansicht", selection: $selectedTab) {
-                Text("Sessions").tag(0)
-                Text("Timeline").tag(1)
-                Text("Heatmap").tag(2)
-                Text("Hall of Fame").tag(3)
-                Text("Team-Entwicklung").tag(4)
-                Text("Team-Check").tag(5)
+                ForEach(AppTab.allCases) { tab in
+                    Text(tab.title).tag(tab)
+                }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -46,20 +43,12 @@ struct GameDetailContent: View {
 
             ScrollView {
                 switch selectedTab {
-                case 0:
-                    SessionsListView(game: game)
-                case 1:
-                    TimelineView(game: game)
-                case 2:
-                    HeatmapView(game: game)
-                case 3:
-                    TeamAnalysisView(game: game)
-                case 4:
-                    TeamEvolutionView(game: game)
-                case 5:
-                    TypeMatchupView(game: game)
-                default:
-                    EmptyView()
+                case .sessions:      SessionsListView(game: game)
+                case .timeline:      TimelineView(game: game)
+                case .heatmap:       HeatmapView(game: game)
+                case .hallOfFame:    TeamAnalysisView(game: game)
+                case .teamEvolution: TeamEvolutionView(game: game)
+                case .teamCheck:     TypeMatchupView(game: game)
                 }
             }
             .scrollIndicators(.never)
