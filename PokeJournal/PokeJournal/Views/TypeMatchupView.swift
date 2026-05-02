@@ -124,7 +124,7 @@ private struct OffensiveMatchupCell: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .foregroundStyle(dimmed ? .secondary : .primary)
-            Text(multiplierLabel)
+            Text(PokemonTypeMultiplier.label(multiplier))
                 .font(.caption2.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
@@ -152,7 +152,7 @@ private struct OffensiveMatchupCell: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 PokemonTypeIcon.image(for: type, size: 14)
-                Text("Trifft \(PokemonTypeLabel.german(for: type)) mit \(multiplierLabel)")
+                Text("Trifft \(PokemonTypeLabel.german(for: type)) mit \(PokemonTypeMultiplier.label(multiplier))")
                     .font(.caption.weight(.semibold))
             }
             Divider()
@@ -165,18 +165,6 @@ private struct OffensiveMatchupCell: View {
             }
         }
         .padding(12)
-    }
-
-    private var multiplierLabel: String {
-        switch multiplier {
-        case 0:    return "×0"
-        case 0.25: return "×¼"
-        case 0.5:  return "×½"
-        case 1:    return "×1"
-        case 2:    return "×2"
-        case 4:    return "×4"
-        default:   return String(format: "×%.2f", multiplier)
-        }
     }
 
     private var outlineColor: Color {
@@ -197,6 +185,6 @@ private struct OffensiveMatchupCell: View {
     }
 
     private var accessibilityText: String {
-        "\(PokemonTypeLabel.german(for: type)), \(multiplierLabel) offensiv"
+        "\(PokemonTypeLabel.german(for: type)), \(PokemonTypeMultiplier.label(multiplier)) offensiv"
     }
 }

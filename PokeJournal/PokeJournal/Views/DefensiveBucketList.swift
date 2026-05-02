@@ -10,7 +10,7 @@ struct DefensiveBucketList: View {
     let generation: TypeChartGeneration
     let affectedMembers: (String) -> [String]
 
-    @AppStorage("typMatchup.neutralExpanded") private var neutralExpanded = false
+    @AppStorage("typeMatchup.neutralExpanded") private var neutralExpanded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -143,7 +143,7 @@ struct DefensiveBucketList: View {
                 PokemonTypeIcon.image(for: type, size: 18)
                 Text(PokemonTypeLabel.german(for: type))
                     .font(.subheadline)
-                Text(multiplierLabel(multiplier))
+                Text(PokemonTypeMultiplier.label(multiplier))
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
@@ -170,18 +170,6 @@ struct DefensiveBucketList: View {
         .background(.fill.quaternary, in: Capsule())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(PokemonTypeLabel.german(for: type)), neutral")
-    }
-
-    private func multiplierLabel(_ multiplier: Double) -> String {
-        switch multiplier {
-        case 0:    return "×0"
-        case 0.25: return "×¼"
-        case 0.5:  return "×½"
-        case 1:    return "×1"
-        case 2:    return "×2"
-        case 4:    return "×4"
-        default:   return String(format: "×%.2f", multiplier)
-        }
     }
 
     private func rowAccessibilityLabel(type: String, multiplier: Double, members: [String]) -> String {

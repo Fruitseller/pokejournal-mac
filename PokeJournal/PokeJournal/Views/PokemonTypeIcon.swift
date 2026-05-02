@@ -68,3 +68,17 @@ enum PokemonTypeLabel {
         }
     }
 }
+
+enum PokemonTypeMultiplier {
+    static func label(_ multiplier: Double) -> String {
+        switch multiplier {
+        case 0:    return "×0"
+        case 0.25: return "×¼"
+        case 0.5:  return "×½"
+        case 1:    return "×1"
+        case 2:    return "×2"
+        case 4:    return "×4"
+        default:   return String(format: "×%.2f", multiplier)
+        }
+    }
+}
