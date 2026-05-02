@@ -9,26 +9,12 @@ import SwiftData
 struct SessionsListView: View {
     let game: Game
 
-    var allSessions: [AnySession] {
-        var combined: [AnySession] = []
-
-        for session in game.sessions {
-            combined.append(.regular(session))
-        }
-
-        for oldSession in game.oldSessions {
-            combined.append(.old(oldSession))
-        }
-
-        return combined.sorted { $0.date > $1.date }
-    }
-
     var body: some View {
+        let sessions = game.allSessions.reversed() as [AnySession]
         VStack(alignment: .leading, spacing: 12) {
-            Text("Sessions (\(allSessions.count))")
+            Text("Sessions (\(sessions.count))")
                 .font(.headline)
 
-            let sessions = allSessions
             LazyVStack(spacing: 8) {
                 ForEach(sessions) { session in
                     NavigationLink(value: session) {
@@ -44,19 +30,17 @@ struct SessionsListView: View {
         }
         .padding()
         .navigationDestination(for: AnySession.self) { session in
-            let sessions = allSessions
-            let previousTeam = previousTeam(for: session, in: sessions)
+            let previousTeam = previousTeam(for: session)
             SessionDetailView(session: session, game: game, previousTeam: previousTeam)
         }
     }
 
-    private func previousTeam(for session: AnySession, in sessions: [AnySession]) -> [TeamMember]? {
-        // sessions is sorted newest-first, so the "previous" session is the next one in the array
-        guard let index = sessions.firstIndex(of: session),
-              index + 1 < sessions.count else {
+    private func previousTeam(for session: AnySession) -> [TeamMember]? {
+        let ascending = game.allSessions
+        guard let index = ascending.firstIndex(of: session), index > 0 else {
             return nil
         }
-        let previous = sessions[index + 1]
+        let previous = ascending[index - 1]
         guard !previous.team.isEmpty else { return nil }
         return previous.team
     }

@@ -10,10 +10,10 @@ enum AnySession: Hashable, Identifiable {
     case regular(Session)
     case old(OldSession)
 
-    var id: String {
+    var id: PersistentIdentifier {
         switch self {
-        case .regular(let s): return "session-\(s.date.timeIntervalSince1970)"
-        case .old(let o): return "old-\(o.date.timeIntervalSince1970)"
+        case .regular(let s): return s.persistentModelID
+        case .old(let o): return o.persistentModelID
         }
     }
 

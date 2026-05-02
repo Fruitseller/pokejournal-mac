@@ -37,6 +37,13 @@ final class Game {
         return (sessionDates + oldSessionDates).sorted(by: <)
     }
 
+    /// All sessions (regular + legacy) wrapped in `AnySession`, sorted oldest first.
+    var allSessions: [AnySession] {
+        let regular = sessions.map(AnySession.regular)
+        let old = oldSessions.map(AnySession.old)
+        return (regular + old).sorted { $0.date < $1.date }
+    }
+
     var totalSessionCount: Int {
         sessions.count + oldSessions.count
     }

@@ -460,40 +460,31 @@ struct TeamEvolutionPipelineTests {
         #expect(glurak.segments[0].dataPoints[1].level == 35)
     }
 
-    @Test func allSessionsSorted_filtersAndSorts() throws {
+    @Test func allSessions_isSortedAscending() throws {
         let container = try makeContainer()
         let context = container.mainContext
 
         let game = Game(name: "Test", filePath: "/test.md")
         context.insert(game)
 
-        // Newer session (no team)
-        let s1 = Session(date: date("2025-02-01"), activities: "No team")
+        let s1 = Session(date: date("2025-02-01"), activities: "Newest")
         s1.game = game
         context.insert(s1)
 
-        // Old session with team (earlier date)
         let old = OldSession(date: date("2024-06-01"), activities: "Old")
         old.game = game
         context.insert(old)
-        let mOld = TeamMember(pokemonName: "Pikachu", level: 10)
-        mOld.oldSession = old
-        context.insert(mOld)
 
-        // Regular session with team (middle date)
-        let s2 = Session(date: date("2025-01-01"), activities: "With team")
+        let s2 = Session(date: date("2025-01-01"), activities: "Middle")
         s2.game = game
         context.insert(s2)
-        let m2 = TeamMember(pokemonName: "Glurak", level: 40)
-        m2.session = s2
-        context.insert(m2)
 
         try context.save()
 
-        let sorted = TeamEvolutionDataBuilder.allSessionsSorted(from: game)
-        // Only 2 sessions with teams, filtered and sorted chronologically
-        #expect(sorted.count == 2)
+        let sorted = game.allSessions
+        #expect(sorted.count == 3)
         #expect(sorted[0].date == date("2024-06-01"))
         #expect(sorted[1].date == date("2025-01-01"))
+        #expect(sorted[2].date == date("2025-02-01"))
     }
 }

@@ -41,7 +41,7 @@ struct PokemonTimeline: Identifiable {
 enum TeamEvolutionDataBuilder {
 
     static func buildTimelines(from game: Game) -> [PokemonTimeline] {
-        let sessions = allSessionsSorted(from: game)
+        let sessions = game.allSessions.filter { $0.hasTeam }
         let db = PokemonDatabase.shared
 
         guard !sessions.isEmpty else { return [] }
@@ -57,7 +57,7 @@ enum TeamEvolutionDataBuilder {
         for (index, session) in sessions.enumerated() {
             for member in session.team {
                 let resolvedPokemon = db.find(byName: member.pokemonName)
-                let key = evolutionLineKey(for: member, db: db)
+                let key = db.evolutionLineKey(for: member.pokemonName, variant: member.variant)
 
                 if pokemonData[key] == nil {
                     pokemonData[key] = (
@@ -83,7 +83,10 @@ enum TeamEvolutionDataBuilder {
         }
 
         // Build timelines
-        return pokemonData.map { (key, data) in
+        return pokemonData.compactMap { (key, data) -> PokemonTimeline? in
+            guard let first = data.appearances.first, let last = data.appearances.last else {
+                return nil
+            }
             let pokemon = db.find(byName: data.latestPokemonName)
             let typeColor = pokemon.map { PokemonTypeColor.color(for: $0.primaryType) } ?? .gray
 
@@ -99,30 +102,11 @@ enum TeamEvolutionDataBuilder {
                 pokemonID: data.latestPokemonID,
                 typeColor: typeColor,
                 segments: segments,
-                firstAppearance: data.appearances.first!.date,
-                lastAppearance: data.appearances.last!.date
+                firstAppearance: first.date,
+                lastAppearance: last.date
             )
         }
         .sorted { $0.firstAppearance < $1.firstAppearance }
-    }
-
-    private static func evolutionLineKey(for member: TeamMember, db: PokemonDatabase) -> String {
-        db.evolutionLineKey(for: member.pokemonName, variant: member.variant)
-    }
-
-    // MARK: - Internal
-
-    static func allSessionsSorted(from game: Game) -> [AnySession] {
-        var combined: [AnySession] = []
-        for session in game.sessions {
-            combined.append(.regular(session))
-        }
-        for oldSession in game.oldSessions {
-            combined.append(.old(oldSession))
-        }
-        return combined
-            .filter { $0.hasTeam }
-            .sorted { $0.date < $1.date }
     }
 
     /// Splits appearances into segments — a gap of >1 session index means the Pokémon left and returned.
