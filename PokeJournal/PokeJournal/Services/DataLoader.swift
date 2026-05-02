@@ -116,7 +116,7 @@ final class DataLoader {
         let metadata = parser.parseYAMLFrontmatter(from: content)
         let game = createGame(name: name, filePath: url.path, metadata: metadata, context: context)
 
-        let parsedSessions = parser.parseOldFormatSessions(from: content, sourceFile: url.path)
+        let parsedSessions = parser.parseOldFormatSessions(from: content)
 
         for parsed in parsedSessions {
             let oldSession = OldSession(
@@ -176,7 +176,7 @@ final class DataLoader {
 
     private func loadOldSessions(for game: Game, from file: URL, context: ModelContext) throws {
         let content = try String(contentsOf: file, encoding: .utf8)
-        let parsedSessions = parser.parseOldFormatSessions(from: content, sourceFile: file.path)
+        let parsedSessions = parser.parseOldFormatSessions(from: content)
 
         for parsed in parsedSessions {
             let oldSession = OldSession(

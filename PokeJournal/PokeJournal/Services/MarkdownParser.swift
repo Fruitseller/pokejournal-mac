@@ -37,6 +37,36 @@ final class MarkdownParser {
         return formatter
     }()
 
+    private static let sectionRegex = try! NSRegularExpression(
+        pattern: #"^#{1,3}\s+(.+)$"#,
+        options: .caseInsensitive
+    )
+    private static let teamRegex = try! NSRegularExpression(
+        pattern: #"^-\s+(?:(\w+)\s+)?(\w+)\s+lvl\s+(\d+)"#,
+        options: [.caseInsensitive, .anchorsMatchLines]
+    )
+    private static let inlineTeamHeaderRegexes: [NSRegularExpression] = [
+        try! NSRegularExpression(
+            pattern: #"(?:Mein\s+)?(?:derzeitiges\s+)?Team[:\s]*\n((?:- .+\n?)+)"#,
+            options: [.caseInsensitive]
+        ),
+        try! NSRegularExpression(
+            pattern: #"Team sieht folgender Maßen aus:\s*\n+((?:- .+\n?)+)"#,
+            options: [.caseInsensitive]
+        ),
+    ]
+    private static let inlineTeamFallbackRegex = try! NSRegularExpression(
+        pattern: #"((?:^- \w+.*lvl.*$\n?)+)"#,
+        options: [.caseInsensitive, .anchorsMatchLines]
+    )
+    private static let oldFormatDateRegex = try! NSRegularExpression(
+        pattern: #"^##\s+(\d{4}-\d{2}-\d{2})"#,
+        options: .anchorsMatchLines
+    )
+    private static let filenameDateRegex = try! NSRegularExpression(
+        pattern: #"(\d{4}-\d{2}-\d{2})"#
+    )
+
     private init() {}
 
     // MARK: - YAML Frontmatter Parser
@@ -159,37 +189,20 @@ final class MarkdownParser {
         return (activities, plans, thoughts, team)
     }
 
-    // Parse team from various inline formats without ## heading
     private func parseTeamFromInlineFormat(_ content: String) -> [ParsedTeamMember] {
-        // Try multiple patterns for team headers:
-        // 1. "Team:" or "Mein Team:" or "Mein derzeitiges Team:" etc.
-        // 2. Any line ending with "Team:" followed by bullet list
-        let teamHeaderPatterns = [
-            #"(?:Mein\s+)?(?:derzeitiges\s+)?Team[:\s]*\n((?:- .+\n?)+)"#,
-            #"Team sieht folgender Maßen aus:\s*\n+((?:- .+\n?)+)"#,
-        ]
+        let range = NSRange(content.startIndex..., in: content)
 
-        for pattern in teamHeaderPatterns {
-            let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
-            if let match = regex?.firstMatch(in: content, options: [], range: NSRange(content.startIndex..., in: content)),
+        for regex in Self.inlineTeamHeaderRegexes {
+            if let match = regex.firstMatch(in: content, options: [], range: range),
                let teamRange = Range(match.range(at: 1), in: content) {
-                let teamContent = String(content[teamRange])
-                let team = parseTeam(from: teamContent)
-                if !team.isEmpty {
-                    return team
-                }
+                let team = parseTeam(from: String(content[teamRange]))
+                if !team.isEmpty { return team }
             }
         }
 
-        // Fallback: Find any bullet list that looks like Pokemon team entries
-        // (lines starting with "- " followed by name and "lvl")
-        let fallbackPattern = #"((?:^- \w+.*lvl.*$\n?)+)"#
-        let fallbackRegex = try? NSRegularExpression(pattern: fallbackPattern, options: [.caseInsensitive, .anchorsMatchLines])
-
-        if let match = fallbackRegex?.firstMatch(in: content, options: [], range: NSRange(content.startIndex..., in: content)),
+        if let match = Self.inlineTeamFallbackRegex.firstMatch(in: content, options: [], range: range),
            let teamRange = Range(match.range(at: 1), in: content) {
-            let teamContent = String(content[teamRange])
-            return parseTeam(from: teamContent)
+            return parseTeam(from: String(content[teamRange]))
         }
 
         return []
@@ -202,11 +215,8 @@ final class MarkdownParser {
         var currentSection: String?
         var currentContent: [String] = []
 
-        let sectionPattern = #"^#{1,3}\s+(.+)$"#
-        let sectionRegex = try? NSRegularExpression(pattern: sectionPattern, options: .caseInsensitive)
-
         for line in lines {
-            if let match = sectionRegex?.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)),
+            if let match = Self.sectionRegex.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)),
                let range = Range(match.range(at: 1), in: line) {
                 if let section = currentSection {
                     sections[section.lowercased()] = currentContent.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -231,11 +241,8 @@ final class MarkdownParser {
     func parseTeam(from content: String) -> [ParsedTeamMember] {
         var members: [ParsedTeamMember] = []
 
-        let pattern = #"^-\s+(?:(\w+)\s+)?(\w+)\s+lvl\s+(\d+)"#
-        let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .anchorsMatchLines])
-
         let range = NSRange(content.startIndex..., in: content)
-        let matches = regex?.matches(in: content, options: [], range: range) ?? []
+        let matches = Self.teamRegex.matches(in: content, options: [], range: range)
 
         for match in matches {
             var variant: String?
@@ -264,18 +271,15 @@ final class MarkdownParser {
 
     // MARK: - Old Format Parser
 
-    func parseOldFormatSessions(from content: String, sourceFile: String) -> [ParsedSession] {
+    func parseOldFormatSessions(from content: String) -> [ParsedSession] {
         var sessions: [ParsedSession] = []
-
-        let datePattern = #"^##\s+(\d{4}-\d{2}-\d{2})"#
-        let dateRegex = try? NSRegularExpression(pattern: datePattern, options: .anchorsMatchLines)
 
         let lines = content.components(separatedBy: .newlines)
         var currentDate: Date?
         var currentContent: [String] = []
 
         for line in lines {
-            if let match = dateRegex?.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)),
+            if let match = Self.oldFormatDateRegex.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)),
                let dateRange = Range(match.range(at: 1), in: line),
                let date = dateFormatter.date(from: String(line[dateRange])) {
 
@@ -327,10 +331,8 @@ final class MarkdownParser {
     // MARK: - Session Filename Parser
 
     func parseDateFromFilename(_ filename: String) -> Date? {
-        let pattern = #"(\d{4}-\d{2}-\d{2})"#
-        let regex = try? NSRegularExpression(pattern: pattern)
-
-        guard let match = regex?.firstMatch(in: filename, options: [], range: NSRange(filename.startIndex..., in: filename)),
+        let nsRange = NSRange(filename.startIndex..., in: filename)
+        guard let match = Self.filenameDateRegex.firstMatch(in: filename, options: [], range: nsRange),
               let range = Range(match.range(at: 1), in: filename) else {
             return nil
         }

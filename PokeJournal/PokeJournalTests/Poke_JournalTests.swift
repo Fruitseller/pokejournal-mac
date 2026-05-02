@@ -16,67 +16,67 @@ struct PokemonFuzzyMatchingTests {
     // MARK: - Levenshtein Distance Tests
 
     @Test func levenshteinDistance_identicalStrings() {
-        let distance = db.levenshteinDistance("pikachu", "pikachu")
+        let distance = PokemonDatabase.levenshteinDistance("pikachu", "pikachu")
         #expect(distance == 0)
     }
 
     @Test func levenshteinDistance_emptyStrings() {
-        #expect(db.levenshteinDistance("", "") == 0)
-        #expect(db.levenshteinDistance("abc", "") == 3)
-        #expect(db.levenshteinDistance("", "abc") == 3)
+        #expect(PokemonDatabase.levenshteinDistance("", "") == 0)
+        #expect(PokemonDatabase.levenshteinDistance("abc", "") == 3)
+        #expect(PokemonDatabase.levenshteinDistance("", "abc") == 3)
     }
 
     @Test func levenshteinDistance_singleCharacterDifference() {
         // Substitution
-        #expect(db.levenshteinDistance("cat", "bat") == 1)
+        #expect(PokemonDatabase.levenshteinDistance("cat", "bat") == 1)
         // Insertion
-        #expect(db.levenshteinDistance("cat", "cats") == 1)
+        #expect(PokemonDatabase.levenshteinDistance("cat", "cats") == 1)
         // Deletion
-        #expect(db.levenshteinDistance("cats", "cat") == 1)
+        #expect(PokemonDatabase.levenshteinDistance("cats", "cat") == 1)
     }
 
     @Test func levenshteinDistance_multipleEdits() {
         // "kitten" -> "sitting" requires 3 edits
-        #expect(db.levenshteinDistance("kitten", "sitting") == 3)
+        #expect(PokemonDatabase.levenshteinDistance("kitten", "sitting") == 3)
     }
 
     @Test func levenshteinDistance_completelyDifferent() {
-        #expect(db.levenshteinDistance("abc", "xyz") == 3)
+        #expect(PokemonDatabase.levenshteinDistance("abc", "xyz") == 3)
     }
 
     // MARK: - Similarity Tests
 
     @Test func similarity_identicalStrings() {
-        let sim = db.similarity("pikachu", "pikachu")
+        let sim = PokemonDatabase.similarity("pikachu", "pikachu")
         #expect(sim == 1.0)
     }
 
     @Test func similarity_emptyStrings() {
-        let sim = db.similarity("", "")
+        let sim = PokemonDatabase.similarity("", "")
         #expect(sim == 1.0)
     }
 
     @Test func similarity_completelyDifferent() {
-        let sim = db.similarity("abc", "xyz")
+        let sim = PokemonDatabase.similarity("abc", "xyz")
         #expect(sim == 0.0)
     }
 
     @Test func similarity_partialMatch() {
         // "glurak" vs "glorak" - 1 edit in 6 chars = 5/6 ≈ 0.833
-        let sim = db.similarity("glurak", "glorak")
+        let sim = PokemonDatabase.similarity("glurak", "glorak")
         #expect(sim > 0.8)
         #expect(sim < 0.9)
     }
 
     @Test func similarity_threshold_shouldPass() {
         // Similar names that should pass 0.8 threshold
-        let sim = db.similarity("pikachu", "pikachuu")
+        let sim = PokemonDatabase.similarity("pikachu", "pikachuu")
         #expect(sim >= 0.8)
     }
 
     @Test func similarity_threshold_shouldFail() {
         // Very different names should fail 0.8 threshold
-        let sim = db.similarity("pikachu", "raichu")
+        let sim = PokemonDatabase.similarity("pikachu", "raichu")
         #expect(sim < 0.8)
     }
 
@@ -118,6 +118,27 @@ struct PokemonFuzzyMatchingTests {
     @Test func find_noMatch() {
         let pokemon = db.find(byName: "NotAPokemon")
         #expect(pokemon == nil)
+    }
+
+    // MARK: - Length-Pruning Tests
+
+    @Test func find_shortInputBelowLengthRatio_returnsNil() {
+        // "Pika" (4 chars) vs "Pikachu" (7 chars): ratio 4/7 ≈ 0.57 < 0.8 → pruned.
+        // Verifies the new prune doesn't accidentally match something it shouldn't.
+        #expect(db.find(byName: "Pika") == nil)
+    }
+
+    @Test func find_lengthRatioAtThreshold_stillMatches() {
+        // "Pikach" (6 chars) vs "Pikachu" (7 chars): ratio 6/7 ≈ 0.857 ≥ 0.8 → not pruned.
+        // Single-char deletion → distance 1 → similarity 6/7 ≈ 0.857 → matches.
+        let pokemon = db.find(byName: "Pikach")
+        #expect(pokemon?.nameEN == "Pikachu")
+    }
+
+    @Test func find_lengthDifferenceTooLarge_doesNotCrashAndReturnsNil() {
+        // Adversarial: input far shorter than any key → all candidates pruned, nil result.
+        #expect(db.find(byName: "x") == nil)
+        #expect(db.find(byName: "ab") == nil)
     }
 }
 
@@ -436,7 +457,7 @@ struct MarkdownParserTests {
         - Panflam lvl 13
         """
 
-        let sessions = parser.parseOldFormatSessions(from: content, sourceFile: "test.md")
+        let sessions = parser.parseOldFormatSessions(from: content)
         #expect(sessions.count == 2)
         #expect(sessions[0].team.count == 2)
         #expect(sessions[1].team.count == 1)
@@ -576,7 +597,7 @@ struct MarkdownParserTests {
         - Felino lvl 16
         """
 
-        let sessions = parser.parseOldFormatSessions(from: content, sourceFile: "old_purpur.md")
+        let sessions = parser.parseOldFormatSessions(from: content)
         #expect(sessions.count == 2)
     }
 
@@ -592,7 +613,7 @@ struct MarkdownParserTests {
         - Tarundel lvl 9
         """
 
-        let sessions = parser.parseOldFormatSessions(from: content, sourceFile: "test.md")
+        let sessions = parser.parseOldFormatSessions(from: content)
         #expect(sessions.count == 1)
         #expect(sessions[0].team.count == 3)
         #expect(sessions[0].team[0].name == "Pamo")
@@ -611,7 +632,7 @@ struct MarkdownParserTests {
         - Knarbon lvl 14
         """
 
-        let sessions = parser.parseOldFormatSessions(from: content, sourceFile: "test.md")
+        let sessions = parser.parseOldFormatSessions(from: content)
         #expect(sessions.count == 1)
         #expect(sessions[0].team.count == 3)
     }
@@ -628,7 +649,7 @@ struct MarkdownParserTests {
         - Knarbon lvl 18
         """
 
-        let sessions = parser.parseOldFormatSessions(from: content, sourceFile: "test.md")
+        let sessions = parser.parseOldFormatSessions(from: content)
         #expect(sessions.count == 1)
         #expect(sessions[0].team.count == 3)
     }

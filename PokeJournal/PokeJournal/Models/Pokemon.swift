@@ -46,6 +46,7 @@ class PokemonDatabase {
 
     private var pokemon: [Pokemon] = []
     private var nameLookup: [String: Pokemon] = [:]
+    private var idLookup: [Int: Pokemon] = [:]
     private var chainLookup: [Int: [Pokemon]] = [:]
 
     private init() {
@@ -64,9 +65,9 @@ class PokemonDatabase {
         for poke in pokemon {
             nameLookup[poke.nameDE.lowercased()] = poke
             nameLookup[poke.nameEN.lowercased()] = poke
+            idLookup[poke.id] = poke
         }
 
-        // Build evolution chain lookup: chainID -> sorted members (by Pokemon ID)
         var chains: [Int: [Pokemon]] = [:]
         for poke in pokemon {
             if let chainID = poke.evolutionChainID {
@@ -115,9 +116,18 @@ class PokemonDatabase {
 
     func fuzzyMatch(name: String) -> Pokemon? {
         let threshold = 0.8
+        let nameLen = name.count
 
         for (key, poke) in nameLookup {
-            if similarity(name, key) >= threshold {
+            // Length-based prune: even with all matching chars, the smaller string
+            // can't exceed `min(a,b) / max(a,b)` similarity. Skip if that's already
+            // below the threshold.
+            let maxLen = max(nameLen, key.count)
+            let minLen = min(nameLen, key.count)
+            guard maxLen > 0,
+                  Double(minLen) / Double(maxLen) >= threshold else { continue }
+
+            if Self.similarity(name, key) >= threshold {
                 return poke
             }
         }
@@ -125,7 +135,7 @@ class PokemonDatabase {
         return nil
     }
 
-    func similarity(_ s1: String, _ s2: String) -> Double {
+    static func similarity(_ s1: String, _ s2: String) -> Double {
         let longer = s1.count > s2.count ? s1 : s2
         let shorter = s1.count > s2.count ? s2 : s1
 
@@ -137,7 +147,7 @@ class PokemonDatabase {
         return (Double(longer.count) - Double(distance)) / Double(longer.count)
     }
 
-    func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
+    static func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
         let s1Array = Array(s1)
         let s2Array = Array(s2)
         let m = s1Array.count
@@ -204,7 +214,7 @@ class PokemonDatabase {
     }
 
     func pokemon(byId id: Int) -> Pokemon? {
-        pokemon.first { $0.id == id }
+        idLookup[id]
     }
 
     private static func normalizedVariant(_ variant: String?) -> String? {

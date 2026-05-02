@@ -84,7 +84,7 @@ struct TestVaultFixtureTests {
         #expect(FileManager.default.fileExists(atPath: oldFile.path))
 
         let content = try String(contentsOf: oldFile, encoding: .utf8)
-        let sessions = MarkdownParser.shared.parseOldFormatSessions(from: content, sourceFile: oldFile.path)
+        let sessions = MarkdownParser.shared.parseOldFormatSessions(from: content)
         #expect(sessions.count >= 2)
     }
 
