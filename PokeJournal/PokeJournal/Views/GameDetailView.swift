@@ -36,6 +36,7 @@ struct GameDetailContent: View {
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier("tabPicker")
             .padding(.horizontal)
             .padding(.bottom, 12)
 

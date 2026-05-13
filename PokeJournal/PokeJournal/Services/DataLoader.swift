@@ -9,10 +9,14 @@ import SwiftData
 @Observable
 final class DataLoader {
     private let parser = MarkdownParser.shared
-    private let vaultManager = VaultManager.shared
+    private let vaultManager: VaultManager
 
     var isLoading = false
     var error: String?
+
+    init(vaultManager: VaultManager = .shared) {
+        self.vaultManager = vaultManager
+    }
 
     func loadGames(into context: ModelContext) async {
         guard vaultManager.startAccessingVault() else {
