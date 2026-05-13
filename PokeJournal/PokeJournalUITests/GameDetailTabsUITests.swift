@@ -41,7 +41,9 @@ final class GameDetailTabsUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(15)
         while Date() < deadline {
             for id in candidates {
-                let row = app.descendants(matching: .any)[id]
+                // SwiftUI propagates accessibilityIdentifier to several nested
+                // elements in the sidebar — match the first one.
+                let row = app.descendants(matching: .any).matching(identifier: id).firstMatch
                 if row.exists {
                     row.click()
                     return id
@@ -67,7 +69,7 @@ final class GameDetailTabsUITests: XCTestCase {
 
         // The Picker has accessibilityIdentifier("tabPicker"). On macOS this maps to a
         // segmented control. Either query shape should locate it.
-        let picker = app.descendants(matching: .any)["tabPicker"]
+        let picker = app.descendants(matching: .any).matching(identifier: "tabPicker").firstMatch
         XCTAssertTrue(
             picker.waitForExistence(timeout: 5),
             "Tab picker should be visible after a game is selected"
@@ -78,28 +80,34 @@ final class GameDetailTabsUITests: XCTestCase {
         let app = launchWithTestVault()
         selectAnyFixtureGame(app)
 
-        let picker = app.descendants(matching: .any)["tabPicker"]
+        let picker = app.descendants(matching: .any).matching(identifier: "tabPicker").firstMatch
         XCTAssertTrue(picker.waitForExistence(timeout: 5))
 
-        // Tab titles come from AppTab.title. If any of these change, this test
-        // should fail with a clear message naming the missing tab.
-        let titles = [
-            "Sessions",
-            "Timeline",
-            "Heatmap",
-            "Hall of Fame",
-            "Team-Entwicklung",
-            "Team-Check"
+        // Tabs are identified by stable accessibility IDs (`tabSegment_<rawValue>`)
+        // for clicking, and validated by their human-readable title so a rename
+        // surfaces here. Order matches `AppTab.allCases`.
+        let tabs: [(rawValue: Int, title: String)] = [
+            (0, "Sessions"),
+            (1, "Timeline"),
+            (2, "Heatmap"),
+            (3, "Hall of Fame"),
+            (4, "Team-Entwicklung"),
+            (5, "Team-Check")
         ]
 
-        for title in titles {
-            let button = picker.buttons[title]
+        for (rawValue, title) in tabs {
+            let id = "tabSegment_\(rawValue)"
+            let segment = app.descendants(matching: .any).matching(identifier: id).firstMatch
             XCTAssertTrue(
-                button.waitForExistence(timeout: 3),
-                "Expected tab segment '\(title)' to exist in the picker"
+                segment.waitForExistence(timeout: 3),
+                "Expected tab segment '\(title)' (\(id)) to exist in the picker"
             )
-            button.click()
-            // Picker stays visible after switching; no crash means the tab's view rendered.
+            // Pin the title contract: the rendered label must match AppTab.title.
+            XCTAssertEqual(
+                segment.label, title,
+                "Tab \(id) should display title '\(title)' — got '\(segment.label)'"
+            )
+            segment.click()
             XCTAssertTrue(picker.exists, "Tab picker disappeared after activating '\(title)'")
         }
     }

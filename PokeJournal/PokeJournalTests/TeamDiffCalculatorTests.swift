@@ -239,8 +239,8 @@ struct TeamDiffPlainTests {
     }
 
     @Test func teamDiff_added_whenPreviousIsEmpty() throws {
-        let context = try makeContainer().mainContext
-        let pikachu = makeMember("Pikachu", 5, in: context)
+        let container = try makeContainer()
+        let pikachu = makeMember("Pikachu", 5, in: container.mainContext)
         let diff = teamDiff(current: [pikachu], previous: [])
         #expect(diff.added.count == 1)
         #expect(diff.added[0].pokemonName == "Pikachu")
@@ -250,8 +250,8 @@ struct TeamDiffPlainTests {
     }
 
     @Test func teamDiff_removed_whenCurrentIsEmpty() throws {
-        let context = try makeContainer().mainContext
-        let pikachu = makeMember("Pikachu", 5, in: context)
+        let container = try makeContainer()
+        let pikachu = makeMember("Pikachu", 5, in: container.mainContext)
         let diff = teamDiff(current: [], previous: [pikachu])
         #expect(diff.removed.count == 1)
         #expect(diff.removed[0].pokemonName == "Pikachu")
@@ -269,9 +269,9 @@ struct TeamDiffPlainTests {
     }
 
     @Test func teamDiff_unchangedMember_atSameLevel_producesNoChanges() throws {
-        let context = try makeContainer().mainContext
-        let prev = makeMember("Pikachu", 5, in: context)
-        let current = makeMember("Pikachu", 5, in: context)
+        let container = try makeContainer()
+        let prev = makeMember("Pikachu", 5, in: container.mainContext)
+        let current = makeMember("Pikachu", 5, in: container.mainContext)
         let diff = teamDiff(current: [current], previous: [prev])
         #expect(diff.added.isEmpty)
         #expect(diff.removed.isEmpty)
@@ -282,9 +282,9 @@ struct TeamDiffPlainTests {
     @Test func teamDiff_levelDecrease_isCapturedAsNegativeDelta() throws {
         // Possible after a softreset or correction; the calculator must not
         // silently drop negative deltas.
-        let context = try makeContainer().mainContext
-        let prev = makeMember("Pikachu", 10, in: context)
-        let current = makeMember("Pikachu", 7, in: context)
+        let container = try makeContainer()
+        let prev = makeMember("Pikachu", 10, in: container.mainContext)
+        let current = makeMember("Pikachu", 7, in: container.mainContext)
         let diff = teamDiff(current: [current], previous: [prev])
         #expect(diff.levelChanges.count == 1)
         #expect(diff.levelChanges[0].delta == -3)
@@ -311,9 +311,9 @@ struct TeamDiffPropertiesTests {
     }
 
     @Test func hasChanges_true_whenAddedNonEmpty() throws {
-        let context = try makeContainer().mainContext
+        let container = try makeContainer()
         let diff = TeamDiff(
-            added: [makeMember("Pikachu", 5, in: context)],
+            added: [makeMember("Pikachu", 5, in: container.mainContext)],
             removed: [],
             levelChanges: [],
             evolutions: []
@@ -323,10 +323,10 @@ struct TeamDiffPropertiesTests {
     }
 
     @Test func hasChanges_true_whenRemovedNonEmpty() throws {
-        let context = try makeContainer().mainContext
+        let container = try makeContainer()
         let diff = TeamDiff(
             added: [],
-            removed: [makeMember("Pikachu", 5, in: context)],
+            removed: [makeMember("Pikachu", 5, in: container.mainContext)],
             levelChanges: [],
             evolutions: []
         )
@@ -335,8 +335,8 @@ struct TeamDiffPropertiesTests {
     }
 
     @Test func hasChanges_true_whenLevelChangesNonEmpty() throws {
-        let context = try makeContainer().mainContext
-        let member = makeMember("Pikachu", 6, in: context)
+        let container = try makeContainer()
+        let member = makeMember("Pikachu", 6, in: container.mainContext)
         let diff = TeamDiff(
             added: [],
             removed: [],
@@ -348,9 +348,9 @@ struct TeamDiffPropertiesTests {
     }
 
     @Test func hasChanges_true_whenEvolutionsNonEmpty() throws {
-        let context = try makeContainer().mainContext
-        let from = makeMember("Glumanda", 14, in: context)
-        let to = makeMember("Glutexo", 16, in: context)
+        let container = try makeContainer()
+        let from = makeMember("Glumanda", 14, in: container.mainContext)
+        let to = makeMember("Glutexo", 16, in: container.mainContext)
         let diff = TeamDiff(
             added: [],
             removed: [],
@@ -368,7 +368,8 @@ struct TeamDiffPropertiesTests {
     }
 
     @Test func changeCount_sumsAllCategories() throws {
-        let context = try makeContainer().mainContext
+        let container = try makeContainer()
+        let context = container.mainContext
         let m = makeMember("Pikachu", 6, in: context)
         let from = makeMember("Glumanda", 14, in: context)
         let to = makeMember("Glutexo", 16, in: context)

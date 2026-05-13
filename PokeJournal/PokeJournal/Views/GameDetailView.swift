@@ -32,7 +32,9 @@ struct GameDetailContent: View {
 
             Picker("Ansicht", selection: $selectedTab) {
                 ForEach(AppTab.allCases) { tab in
-                    Text(tab.title).tag(tab)
+                    Text(tab.title)
+                        .tag(tab)
+                        .accessibilityIdentifier("tabSegment_\(tab.rawValue)")
                 }
             }
             .pickerStyle(.segmented)
