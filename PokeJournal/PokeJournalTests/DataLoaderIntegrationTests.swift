@@ -191,7 +191,7 @@ struct DataLoaderIntegrationTests {
         #expect(game.sessions.count == 1)
     }
 
-    @Test func loadGames_isIdempotent_repeatedLoadDoesNotDuplicate() async throws {
+    @Test func loadGames_repeatedLoadWithoutClear_duplicatesRows() async throws {
         // Running loadGames twice without clearing is realistic on app foregrounding.
         // We don't currently dedupe — this test pins today's behaviour so the next
         // person to change it sees the contract break.
