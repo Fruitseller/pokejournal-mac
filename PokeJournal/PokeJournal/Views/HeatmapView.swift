@@ -31,46 +31,49 @@ struct HeatmapView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Heatmap")
-                .font(.headline)
-
+        Group {
             if grid.weeks.isEmpty {
-                Text("Keine Sessions gefunden")
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                TabEmptyStateView(
+                    "Keine Sessions gefunden",
+                    systemImage: "square.grid.3x3.square",
+                    description: "Sobald du Sessions in deinem Vault hast, erscheinen sie hier als Heatmap."
+                )
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        monthLabelsRow
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Heatmap")
+                        .font(.headline)
 
-                        HStack(alignment: .top, spacing: Self.cellSpacing) {
-                            VStack(spacing: Self.cellSpacing) {
-                                ForEach(0..<7, id: \.self) { i in
-                                    Text(Self.weekdayLabels[i])
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                        .frame(
-                                            width: Self.weekdayLabelWidth,
-                                            height: Self.cellSize,
-                                            alignment: .trailing
-                                        )
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            monthLabelsRow
+
+                            HStack(alignment: .top, spacing: Self.cellSpacing) {
+                                VStack(spacing: Self.cellSpacing) {
+                                    ForEach(0..<7, id: \.self) { i in
+                                        Text(Self.weekdayLabels[i])
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                            .frame(
+                                                width: Self.weekdayLabelWidth,
+                                                height: Self.cellSize,
+                                                alignment: .trailing
+                                            )
+                                    }
                                 }
+
+                                gridCanvas
                             }
-
-                            gridCanvas
                         }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 8)
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                }
-                .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
+                    .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
 
-                legendView
+                    legendView
+                }
+                .padding()
             }
         }
-        .padding()
         .task(id: contentSignature) {
             grid = HeatmapDataBuilder.buildGrid(from: game)
             hoveredCell = nil

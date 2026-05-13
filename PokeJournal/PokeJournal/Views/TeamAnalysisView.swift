@@ -16,27 +16,27 @@ struct TeamAnalysisView: View {
     }
 
     var body: some View {
-        LazyVStack(alignment: .leading, spacing: 24) {
+        Group {
             if isLoading {
                 ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
-            } else if !hallOfFame.isEmpty {
-                HallOfFameSection(pokemon: hallOfFame)
-            }
-
-            if !isLoading && !pokemonUsage.isEmpty {
-                UsageStatsSection(usage: pokemonUsage)
-            }
-
-            if !isLoading && pokemonUsage.isEmpty {
-                Text("Keine Team-Daten vorhanden")
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .containerRelativeFrame(.vertical)
+            } else if pokemonUsage.isEmpty {
+                TabEmptyStateView(
+                    "Keine Team-Daten",
+                    systemImage: "trophy",
+                    description: "Sessions mit Team-Daten erscheinen hier in der Hall of Fame und in der Nutzungs-Statistik."
+                )
+            } else {
+                LazyVStack(alignment: .leading, spacing: 24) {
+                    if !hallOfFame.isEmpty {
+                        HallOfFameSection(pokemon: hallOfFame)
+                    }
+                    UsageStatsSection(usage: pokemonUsage)
+                }
+                .padding()
             }
         }
-        .padding()
         .task(id: contentSignature) {
             isLoading = true
             pokemonUsage = []

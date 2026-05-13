@@ -103,48 +103,51 @@ struct TimelineView: View {
     @State private var segments: [TimelineSegment] = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Timeline")
-                .font(.headline)
-
+        Group {
             if segments.isEmpty {
-                Text("Keine Sessions gefunden")
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                TabEmptyStateView(
+                    "Keine Sessions gefunden",
+                    systemImage: "calendar.badge.exclamationmark",
+                    description: "Sobald du Sessions in deinem Vault hast, erscheinen sie hier in der Timeline."
+                )
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .center, spacing: 0) {
-                        ForEach(Array(segments.enumerated()), id: \.element.id) { index, segment in
-                            let prevDate = index > 0
-                                ? segments[index - 1].sessions.last?.date
-                                : nil
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Timeline")
+                        .font(.headline)
 
-                            TimelineSegmentView(
-                                segment: segment,
-                                previousDate: prevDate,
-                                vaultName: VaultManager.shared.vaultName
-                            )
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(alignment: .center, spacing: 0) {
+                            ForEach(Array(segments.enumerated()), id: \.element.id) { index, segment in
+                                let prevDate = index > 0
+                                    ? segments[index - 1].sessions.last?.date
+                                    : nil
 
-                            if let gapDays = segment.gapDaysAfter,
-                               let fromDate = segment.sessions.last?.date,
-                               let toDate = segments[safe: index + 1]?.sessions.first?.date {
-                                let fromYear = TimelineDataBuilder.year(of: fromDate)
-                                let toYear = TimelineDataBuilder.year(of: toDate)
-                                TimelineGapView(
-                                    days: gapDays,
-                                    yearChange: fromYear != toYear ? toYear : nil
+                                TimelineSegmentView(
+                                    segment: segment,
+                                    previousDate: prevDate,
+                                    vaultName: VaultManager.shared.vaultName
                                 )
+
+                                if let gapDays = segment.gapDaysAfter,
+                                   let fromDate = segment.sessions.last?.date,
+                                   let toDate = segments[safe: index + 1]?.sessions.first?.date {
+                                    let fromYear = TimelineDataBuilder.year(of: fromDate)
+                                    let toYear = TimelineDataBuilder.year(of: toDate)
+                                    TimelineGapView(
+                                        days: gapDays,
+                                        yearChange: fromYear != toYear ? toYear : nil
+                                    )
+                                }
                             }
                         }
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 16)
                     }
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 16)
+                    .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
                 }
-                .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: 12))
+                .padding()
             }
         }
-        .padding()
         .task(id: contentSignature) {
             segments = TimelineDataBuilder.buildSegments(from: game)
         }

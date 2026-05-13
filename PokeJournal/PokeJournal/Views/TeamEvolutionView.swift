@@ -45,13 +45,13 @@ struct TeamEvolutionView: View {
         Group {
             if isLoading {
                 ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .containerRelativeFrame(.vertical)
             } else if timelines.isEmpty {
-                ContentUnavailableView(
+                TabEmptyStateView(
                     "Keine Team-Daten",
                     systemImage: "chart.line.uptrend.xyaxis",
-                    description: Text("Sessions mit Team-Daten werden hier als Level-Verlauf angezeigt.")
+                    description: "Sessions mit Team-Daten werden hier als Level-Verlauf angezeigt."
                 )
             } else {
                 VStack(alignment: .leading, spacing: 16) {
